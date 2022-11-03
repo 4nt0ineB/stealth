@@ -5,7 +5,7 @@ BINDIR = bin
 CPPFLAGS = -Iinclude/
 CFLAGS = -ansi -Wall
 LFLAGS = -lMLV
-OBJ = Main.o Menu.o Room.o Mana.o Test.o
+OBJ = Main.o Menu.o Room.o Test.o
 
 all : $(BINDIR)/prog clean
 
