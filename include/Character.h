@@ -7,9 +7,17 @@
 
 #ifndef STEALTH_CHARACTER_H
 #define STEALTH_CHARACTER_H
+#include "Controller.h"
 
 /* Module that implements the game character and all its functionalities */
 
-void bla();
+typedef struct {
+    int x; /* MAYBE FLOATS BECAUSE OF SPEED ???*/
+    int y;
+    int mana;
+    int speed;
+} Character;
+
+Character init_character();
 
 #endif /* STEALTH_CHARACTER_H */

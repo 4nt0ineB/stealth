@@ -8,6 +8,6 @@
 #ifndef STEALTH_CONTROLLER_H
 #define STEALTH_CONTROLLER_H
 
+#define SPEED 10 /* High chance to change after trying when graphics are done*/
 
-
-#endif /* STEALTH_CONTROLLER_H */
+#endif /* STEALTH_CONTROLLER_H */ 

@@ -4,10 +4,15 @@
 #include "Character.h"
 #include "Guard.h"
 #include "Relic.h"
+#include "Direction.h"
+#include "Tile.h"
 #include "graphics/Graphic.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main(int args, char *argv[]){
+    srand(time(NULL));
     printf("Working properly \n");
     return 0;
 }
