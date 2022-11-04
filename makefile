@@ -1,35 +1,57 @@
 CC = gcc
-SRCDIR = src
-HEADDIR = include
-BINDIR = bin
-CPPFLAGS = -Iinclude/
-CFLAGS = -ansi -Wall
-LFLAGS = -lMLV
-OBJ = Main.o Menu.o Room.o Test.o
+SRCDIR = src/
+HEADDIR = include/
+BINDIR = bin/
+OBJDIR = $(BINDIR)obj/
+CFLAGS = -ansi -O2 -g -Wall -Wfatal-errors -I$(HEADDIR)
+LDFLAGS = -lMLV
+EXEC = $(BINDIR)prog
+ARGS =
 
-all : $(BINDIR)/prog clean
+#### Modules path ####
+# find all modules (.c)
+SRC = $(shell find $(SRCDIR) -name \*.c)
+# Build BIN destination src/x/x.c -> bin/x/x.o
+OBJ = $(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(SRC))
+# Build dependencies automatically
+DEP = $(patsubst $(SRCDIR)%.c, $(BINDIR)%.d, $(SRC))
+# Search for dependency rules and includes it
 
-$(BINDIR)/prog : $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LFLAGS)
+###### Run ######
+run: install
+	./$(EXEC) $(ARGS)
 
-Menu.o : $(SRCDIR)/Menu.c $(HEADDIR)/Menu.h
+###### Test ######
+vtest: install
+	valgrind --track-origins=yes --leak-check=yes -s ./$(EXEC) $(ARGS)
+gtest: install
+	gprof -b ./$(EXEC) gmon.out
 
-Room.o : $(SRCDIR)/Room.c $(HEADDIR)/Room.h
+###### Compilation ######
+install: --make-bin-dir $(EXEC)
 
-Character.o : $(SRCDIR)/Character.c $(HEADDIR)/Character.h
+# we need to gather all object from bin
+# so we build all needed paths bin/Main.o, etc..
+${EXEC}: $(OBJ)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
-Guard.o : $(SRCDIR)/Guard.c $(HEADDIR)/Guard.h
+# if target bin/Thing.o exists compiles it to bin
+$(OBJDIR)%.o: $(SRCDIR)%.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-Relic.o : $(SRCDIR)/Relic.c $(HEADDIR)/Relic.h 
+# reproduces modules dir hierarchy in bin
+--make-bin-dir:
+	@mkdir -p $(BINDIR)
+	@mkdir -p $(shell dirname $(OBJ))
 
-Graphic.o : $(SRCDIR)/Graphic.c $(HEADDIR)/Graphic.h 
+doc:
+	doxygen doxygen
 
-Test.o : $(SRCDIR)/Test.c $(HEADDIR)/Test.h
+###### Cleaning ######
+.PHONY: clean uninstall
+clean:
+	@rm -rf $(OBJDIR)
+	@rm -rf html
 
-Main.o : $(SRCDIR)/Main.c $(HEADDIR)/Menu.h $(HEADDIR)/Room.h $(HEADDIR)/Character.h $(HEADDIR)/Guard.h $(HEADDIR)/Relic.h $(HEADDIR)/Graphic.h $(HEADDIR)/Test.h
-
-%.o : $(SRCDIR)/%.c
-	$(CC) -c $< $(CPPFLAGS) $(CFLAGS) $(LFLAGS)
-
-clean : 
-	rm *.o
+uninstall: clean
+	@rm -rf $(BINDIR)

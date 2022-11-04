@@ -5,9 +5,9 @@
  *   SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef STEALTH_TEST_H
-#define STEALTH_TEST_H
+#ifndef STEALTH_CONTROLLER_H
+#define STEALTH_CONTROLLER_H
 
-/* Test module implementing all functions tests to see if they work properly */
 
-#endif /* STEALTH_TEST_H */
+
+#endif /* STEALTH_CONTROLLER_H */
