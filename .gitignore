@@ -4,6 +4,7 @@ projet-stealth.pdf
 # bin
 bin/
 html/
+cmake-build-debug/
 
 # IDE
 .code/
