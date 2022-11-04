@@ -5,9 +5,9 @@
  *   SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef STEALTH_TEST_H
-#define STEALTH_TEST_H
+#ifndef STEALTH_GRAPHIC_H
+#define STEALTH_GRAPHIC_H
 
-/* Test module implementing all functions tests to see if they work properly */
+/* Module that implements all the graphic part of the game */
 
-#endif /* STEALTH_TEST_H */
+#endif /* STEALTH_GRAPHIC_H */

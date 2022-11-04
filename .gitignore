@@ -1,3 +1,16 @@
+# local ressources
+projet-stealth.pdf
+
+# bin
+bin/
+html/
+cmake-build-debug/
+
+# IDE
+.code/
+.vscode/
+.idea/
+
 # Prerequisites
 *.d
 
