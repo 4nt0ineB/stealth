@@ -18,6 +18,6 @@ typedef struct {
     int speed;
 } Character;
 
-Character init_character();
+void init_character(Character *player, int x, int y);
 
 #endif /* STEALTH_CHARACTER_H */

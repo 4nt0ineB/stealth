@@ -22,7 +22,7 @@ typedef struct {
 } Guard;
 
 /* Function that init a new guard at his inital values*/
-Guard init_guard(int x, int y);
+void init_guard(Guard *guard, int x, int y);
 
 /* Make the guard go into panick mode */
 void make_panick(Guard *guard);

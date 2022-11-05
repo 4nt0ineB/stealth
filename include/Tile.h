@@ -7,6 +7,7 @@
 
 #ifndef STEALTH_TILE_H
 #define STEALTH_TILE_H
+#include <stdio.h>
 
 typedef enum {
     WALL,
@@ -20,6 +21,8 @@ typedef struct {
     int caught;
 } Tile;
 
-Tile init_tile(TileType tile_type);
+void init_tile(Tile *tile, TileType tile_type);
+
+void print_tile(Tile tile);
 
 #endif

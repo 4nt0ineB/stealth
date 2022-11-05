@@ -10,10 +10,12 @@
 #include "Tile.h"
 #include "Character.h"
 #include "Guard.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 /* Module that will implement the board game */
 
-#define ROOM_WIDTH 60
+#define ROOM_WIDTH 45
 #define ROOM_HEIGHT 45
 
 #define MINSIDE 9
@@ -25,5 +27,9 @@ typedef struct {
     Character player;
     Guard guards[GUARD_NUMBER];
 } Room;
+
+void init_room(Room *new_room);
+
+void print_room(Room room);
 
 #endif /* STEALTH_ROOM_H */

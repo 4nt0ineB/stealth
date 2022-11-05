@@ -1,13 +1,11 @@
 #include "Guard.h"
 
-Guard init_guard(int x, int y){
-    Guard new_guard;
-    new_guard.x = x;
-    new_guard.y = y;
-    new_guard.speed = SPEED / ((rand() % 6) + 3);
-    new_guard.direction = new_dir();
-    new_guard.panick_mode = 0;
-    return new_guard;
+void init_guard(Guard *new_guard, int x, int y){
+    new_guard->x = x;
+    new_guard->y = y;
+    new_guard->speed = SPEED / ((rand() % 6) + 3);
+    new_guard->direction = new_dir();
+    new_guard->panick_mode = 0;
 }
 
 void change_direction(Guard *guard){

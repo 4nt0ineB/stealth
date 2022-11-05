@@ -13,6 +13,9 @@
 
 int main(int args, char *argv[]){
     srand(time(NULL));
-    printf("Working properly \n");
+    /* TESTING ROOM FUNCTIONS */
+    Room room;
+    init_room(&room);
+    print_room(room);
     return 0;
 }
