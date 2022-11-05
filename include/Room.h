@@ -15,8 +15,8 @@
 
 /* Module that will implement the board game */
 
-#define ROOM_WIDTH 45
 #define ROOM_HEIGHT 45
+#define ROOM_WIDTH 60
 
 #define MINSIDE 9
 

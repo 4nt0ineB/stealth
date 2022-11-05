@@ -29,7 +29,7 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
         }
         /* Creating the Wall that divide the 2 spaces at x / 2*/
         for (; i < j; i++) 
-            init_tile(&(room->room[x_min + compartiment_x][i]), WALL);
+            init_tile(&(room->room[i][x_min + compartiment_x]), WALL);
         generate_room(room, x_min, y_min, compartiment_x + x_min, y_max);
         generate_room(room, compartiment_x + x_min, y_min, x_max, y_max);
     } 
@@ -54,7 +54,7 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
         }
         /* Creating the Wall that divide the 2 spaces at x / 2*/
         for (; i < j; i++) 
-            init_tile(&(room->room[i][compartiment_y + y_min]), WALL);
+            init_tile(&(room->room[compartiment_y + y_min][i]), WALL);
         generate_room(room, x_min, y_min, x_min, y_min + compartiment_y);
         generate_room(room, x_min, y_min + compartiment_y, x_max, y_max);
     }   
@@ -74,8 +74,8 @@ void init_room(Room *new_room){
     }
     
     /* Generate inside walls*/
-/*     generate_room(new_room, 0, 0, ROOM_WIDTH - 1, ROOM_HEIGHT - 1);
- */
+    generate_room(new_room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
+
     init_character(&(new_room->player), 2, 2); /* Not good values just to test*/
     for(i = 0; i < GUARD_NUMBER; i++)
         init_guard(&(new_room->guards[i]), 0, 0); /* Same about values*/
@@ -90,6 +90,6 @@ void print_room(Room room){
             else print_tile(room.room[i][j]);
         }
         printf("\n");
-    }
-    printf("%d %d\n", ROOM_HEIGHT, ROOM_WIDTH);
+    } 
+    printf("Room Height : %d  Width : %d\n", ROOM_HEIGHT, ROOM_WIDTH);
 }
