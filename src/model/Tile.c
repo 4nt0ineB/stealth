@@ -1,4 +1,4 @@
-#include "Tile.h"
+#include "model/Tile.h"
 
 void init_tile(Tile *new_tile, TileType tile_type){
     new_tile->tile_type = tile_type;

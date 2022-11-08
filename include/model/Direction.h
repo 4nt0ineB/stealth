@@ -7,7 +7,6 @@
 
 #ifndef STEALTH_DIRECTION_H
 #define STEALTH_DIRECTION_H
-#include "Controller.h"
 
 typedef enum {
     RIGHT, 

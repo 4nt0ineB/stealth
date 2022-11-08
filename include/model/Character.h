@@ -7,7 +7,6 @@
 
 #ifndef STEALTH_CHARACTER_H
 #define STEALTH_CHARACTER_H
-#include "Controller.h"
 
 /* Module that implements the game character and all its functionalities */
 
