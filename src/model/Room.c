@@ -1,4 +1,4 @@
-#include "Room.h"
+#include "model/Room.h"
 
 
 void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){

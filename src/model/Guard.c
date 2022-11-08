@@ -1,9 +1,14 @@
-#include "Guard.h"
+#include "core/Settings.h"
+
+#include "model/Guard.h"
+
+
+#include <stdlib.h>
 
 void init_guard(Guard *new_guard, int x, int y){
     new_guard->x = x;
     new_guard->y = y;
-    new_guard->speed = SPEED / ((rand() % 6) + 3);
+    new_guard->speed = SPS / ((rand() % 6) + 3);
     new_guard->direction = new_dir();
     new_guard->panick_mode = 0;
 }
@@ -16,7 +21,7 @@ void change_direction(Guard *guard){
 }
 
 void change_speed(Guard *guard){
-    guard->speed = SPEED / ((rand() % 6) + 3);
+    guard->speed = SPS / ((rand() % 6) + 3);
 }
 
 void move(Guard *guard){
@@ -60,7 +65,7 @@ void normal_mode(Guard *guard){
 void panick_mode(Guard *guard){
     if (rand() % 50 == 1)
         change_guard(guard);
-    guard->speed = SPEED;
+    guard->speed = SPS;
     /* TODO DETECTION FUNCTION */
     move(guard);
 }
@@ -68,7 +73,7 @@ void panick_mode(Guard *guard){
 void guard_move(Guard *guard){
     if (guard->panick_mode)
         panick_mode(guard);
-    else if(!panick_mode && guard->speed == SPEED){
+    else if(!panick_mode && guard->speed == SPS){
         /* Just got out of panick mode so must reset to a normal
         mode speed before calling normal_mode function */
         change_speed(guard);

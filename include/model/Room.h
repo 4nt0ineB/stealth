@@ -7,6 +7,7 @@
 
 #ifndef STEALTH_ROOM_H
 #define STEALTH_ROOM_H
+#include "core/Settings.h"
 #include "Tile.h"
 #include "Character.h"
 #include "Guard.h"
@@ -15,12 +16,7 @@
 
 /* Module that will implement the board game */
 
-#define ROOM_HEIGHT 45
-#define ROOM_WIDTH 60
-
 #define MINSIDE 9
-
-#define GUARD_NUMBER 5
 
 typedef struct {
     Tile room[ROOM_HEIGHT][ROOM_WIDTH];

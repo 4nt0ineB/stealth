@@ -7,7 +7,6 @@
 
 #ifndef STEALTH_GUARD_H
 #define STEALTH_GUARD_H
-#include "Controller.h"
 #include "Direction.h"
 
 /* Module that implements the guards of the game and all their functionalities */
