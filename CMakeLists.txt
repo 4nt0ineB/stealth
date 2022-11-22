@@ -37,7 +37,7 @@ add_executable(stealth
         src/core/Util.c
         include/core/Util.h src/core/Settings.c src/core/Timer.c include/core/Timer.h)
 
-target_link_libraries(${PROJECT_NAME} MLV)
+target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros
 add_compile_definitions(RESOURCES_DIR="../resources/")
 add_compile_definitions(DEFAULT_WIN_W_PERCENT=70)

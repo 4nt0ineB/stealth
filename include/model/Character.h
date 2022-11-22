@@ -8,15 +8,30 @@
 #ifndef STEALTH_CHARACTER_H
 #define STEALTH_CHARACTER_H
 
+#include <assert.h>
+#include "core/geometry/Position.h"
+#include "core/Settings.h"
+#include "Direction.h"
+
 /* Module that implements the game character and all its functionalities */
 
 typedef struct {
-    int x; /* MAYBE FLOATS BECAUSE OF SPEED ???*/
-    int y;
+    Position position; /*<!  The coordinates where the player is(not the cell index he is on)  */
     int mana;
-    int speed;
+    double speed;
+    Direction direction; /*<! Need to store the direction to detect a change of direction */
 } Character;
 
-void init_character(Character *player, int x, int y);
+/**
+ * Init a given character with default values
+ * @param new_character
+ * @param x
+ * @param y
+ */
+void character_init(Character *new_character, int x, int y);
+
+void character_update_speed(Character *character, Direction direction);
+
+void character_move(Character *character, int x, int y);
 
 #endif /* STEALTH_CHARACTER_H */

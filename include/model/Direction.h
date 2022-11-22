@@ -8,13 +8,28 @@
 #ifndef STEALTH_DIRECTION_H
 #define STEALTH_DIRECTION_H
 
+/**
+ * The cardinal directions,
+ * and STILL when motionless
+ */
 typedef enum {
-    RIGHT, 
-    LEFT,
-    UP,
-    DOWN
+    STILL = 0,
+    N,
+    NE,
+    E,
+    SE,
+    S,
+    SO,
+    O,
+    NO
 } Direction;
 
+/**
+ * factor to apply to a vector depending on Direction
+ */
+extern const double direction_factor[9][2];
+
 Direction new_dir();
+
 
 #endif

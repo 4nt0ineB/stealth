@@ -20,7 +20,7 @@ SUBMODULES = $(shell dirname $(OBJ))
 
 ARGS =
 CC = gcc
-LDFLAGS = -lMLV
+LDFLAGS = -lMLV -lm
 CFLAGS = -ansi -O2 -g -Wall  \
 			-I$(HEADDIR) -I$(HEADDIR)controller/ -I$(HEADDIR)graphics/  -I$(HEADDIR)core/ -I$(HEADDIR)/ \
 			-DRESOURCES_DIR='"resources/"' \

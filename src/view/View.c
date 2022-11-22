@@ -133,7 +133,7 @@ void view_draw_room(Room *room){
     /* Draw lines */
     int ox = View.game_area.origin.x;
     int oy = View.game_area.origin.y;
-    int thickness = 2;
+    int thickness = 1;
     for(i = 0; i < ROOM_HEIGHT; i++){
         MLV_draw_filled_rectangle(
                 ox
@@ -157,7 +157,7 @@ void view_draw_room(Room *room){
             /*
              * @Todo delegate
              * */
-            switch (room->room[i][j].tile_type) {
+            switch (room->room[i][j].type) {
                 case WALL:
                     MLV_draw_filled_rectangle(
                             ox + j * SIDE
@@ -176,8 +176,8 @@ void view_draw_room(Room *room){
 
     /* Player */
     MLV_draw_filled_circle(
-            ox + room->player.x
-            , oy + room->player.y
+            ox + room->player.position.x
+            , oy + room->player.position.y
             , SIDE / 2
             , MLV_COLOR_RED);
 

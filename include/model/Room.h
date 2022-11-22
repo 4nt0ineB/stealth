@@ -28,4 +28,11 @@ void init_room(Room *new_room);
 
 void print_room(Room room);
 
+/**
+ * Moves the player according to a given direction
+ * @param room
+ * @param direction
+ */
+void room_move_player(Room *room, Direction direction);
+
 #endif /* STEALTH_ROOM_H */

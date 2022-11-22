@@ -14,12 +14,14 @@
 #ifndef STEALTH_SETTINGS_H
 #define STEALTH_SETTINGS_H
 
-
 /* Frames per second */
 #define FPS 60
-/* Square per second */
-#define SPS 1
-
+/* Square per second (v) */
+#define SPS 10
+#define PLAYER_INIT_SPEED 0.1
+#define PLAYER_INCR_SPEED 0.03
+#define PLAYER_MAX_SPEED 0.9
+#define COMPUTE_MOVE_DIST(v) ((((v) * SPS * (double) SIDE)) / FPS)
 
 #define ROOM_HEIGHT 45
 #define ROOM_WIDTH 60

@@ -9,6 +9,8 @@
 #ifndef STEALTH_UTIL_H
 #define STEALTH_UTIL_H
 
+#define SQRT2 1.414213562
+
 /**
  * @file Util.h
  * @brief Useful functions used across the project

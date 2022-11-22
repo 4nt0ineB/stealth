@@ -13,13 +13,21 @@
  *
  */
 typedef struct position {
-    int x, y;
+    double x, y;
 } Position;
+
+typedef Position Vector;
 
 /**
  * Print the position on stdout
  * @param position
  */
 void position_print(Position *position);
+
+/**
+ * Assign given coordinates into the position
+ * @param position
+ */
+void position_init(Position *position, int x, int y);
 
 #endif /* STEALTH_POSITION_H */

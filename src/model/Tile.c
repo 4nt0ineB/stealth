@@ -1,8 +1,8 @@
 #include "model/Tile.h"
 
-void init_tile(Tile *new_tile, TileType tile_type){
-    new_tile->tile_type = tile_type;
-    switch (new_tile->tile_type){
+void init_tile(Tile *new_tile, TileType type){
+    new_tile->type = type;
+    switch (new_tile->type){
         case WALL:
             new_tile->caught = 0;
             new_tile->mana = 0;
@@ -19,7 +19,7 @@ void init_tile(Tile *new_tile, TileType tile_type){
 }
 
 void print_tile(Tile tile){
-    switch (tile.tile_type) {
+    switch (tile.type) {
         case TILE:
             printf(" ");
             break;
