@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22.3)
 project(stealth C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 90)
 
 include_directories(include)
 include_directories(include/controller)
@@ -35,7 +35,9 @@ add_executable(stealth
         src/core/geometry/Circle.c
         include/core/geometry/Circle.h
         src/core/Util.c
-        include/core/Util.h src/core/Settings.c src/core/Timer.c include/core/Timer.h src/model/Entity.c include/model/Entity.h)
+        include/core/Util.h src/core/Settings.c
+        src/core/Timer.c
+        include/core/Timer.h)
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros

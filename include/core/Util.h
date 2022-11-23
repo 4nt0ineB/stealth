@@ -23,7 +23,8 @@
 
 
 /**
- * Return a random int between two values
+ * Return a random int between two values.
+ * [a,b]
  * @param a
  * @param b
  * @return

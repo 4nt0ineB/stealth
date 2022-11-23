@@ -16,10 +16,10 @@
 /* Module that implements the game character and all its functionalities */
 
 typedef struct {
-    Position position; /*<!  The coordinates where the player is(not the cell index he is on)  */
     int mana;
-    double speed;
     Direction direction; /*<! Need to store the direction to detect a change of direction */
+    double speed;
+    Position position; /*<!  The coordinates where the entity is (not the cell index it is on)  */
 } Character;
 
 /**
@@ -31,7 +31,5 @@ typedef struct {
 void character_init(Character *new_character, int x, int y);
 
 void character_update_speed(Character *character, Direction direction);
-
-void character_move(Character *character, int x, int y);
 
 #endif /* STEALTH_CHARACTER_H */

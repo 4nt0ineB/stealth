@@ -5,11 +5,10 @@
 #include "core/Timer.h"
 #include <MLV/MLV_all.h>
 
-static Direction get_direction();
+static Direction get_direction_from_keyboard();
 
 int slealth_controller(Room *room) {
     int run = 1;
-    Direction direction;
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
     view_init();
@@ -29,7 +28,8 @@ int slealth_controller(Room *room) {
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_x)){
             break;
         }
-        room_move_player(room, get_direction());
+        room_move_player(room, get_direction_from_keyboard());
+        room_move_guards(room);
         /*printf("%d %s \n", state, MLV_convert_keyboard_button_to_string(touche));*/
         /* move entities */
         /* collision detection and other game mechanism */
@@ -40,7 +40,7 @@ int slealth_controller(Room *room) {
 }
 
 
-static Direction get_direction() {
+static Direction get_direction_from_keyboard() {
     static Direction direction;
     if (!MLV_get_keyboard_state(MLV_KEYBOARD_z)
         && !MLV_get_keyboard_state(MLV_KEYBOARD_d))

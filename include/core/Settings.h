@@ -27,6 +27,13 @@
 #define ROOM_WIDTH 60
 
 #define GUARD_NUMBER 5
+#define GUARD_NEW_DIR_PROBABILITY 0.02
+#define GUARD_MIN_SPEED 0.3
+#define GUARD_MAX_SPEED 0.8
+#define GUARD_VIEW_RANGE 4
+#define GUARD_PANIC_SPEED 1
+#define GUARD_PANIC_VIEW_RANGE 6
+
 
 /**
  * Global of the size of a Tile

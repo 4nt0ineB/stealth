@@ -8,28 +8,41 @@
 #ifndef STEALTH_GUARD_H
 #define STEALTH_GUARD_H
 #include "Direction.h"
+#include "core/geometry/Position.h"
 
-/* Module that implements the guards of the game and all their functionalities */
-
+/**
+ * Module that implements the guards of the game and all their functionalities
+ */
 
 typedef struct {
-    int x; /* MAYBE FLOATS BECAUSE OF SPEED ???*/
-    int y;
-    int speed;
     int panick_mode;
-    Direction direction;    
+    Direction direction; /*<! Need to store the direction to detect a change of direction */
+    double speed;
+    Position position; /*<!  The coordinates where the entity is (not the cell index it is on)  */
 } Guard;
 
-/* Function that init a new guard at his inital values*/
-void init_guard(Guard *guard, int x, int y);
+/**
+ * Function that init a new guard at his inital values
+ * @param guard
+ * @param x
+ * @param y
+ */
+void guard_init(Guard *guard, int x, int y);
 
-/* Make the guard go into panick mode */
-void make_panick(Guard *guard);
+/**
+ * Make the guard go into panick mode
+ * @param guard
+ */
+void guard_panick(Guard *guard);
 
-/* Make the guard drop his panick mode */
-void unpanick(Guard *guard);
+/**
+ * Make the guard drop his panick mode
+ * @param guard
+ */
+void guard_unpanick(Guard *guard);
 
-/* Function that makes the guard move depending his mode of moving (panick or not)*/
-void guard_move(Guard *guard);
+Direction guard_update_direction(Guard *guard);
+
+void guard_update_speed(Guard *guard);
 
 #endif /* STEALTH_GUARD_H */
