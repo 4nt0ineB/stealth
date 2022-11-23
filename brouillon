@@ -1,0 +1,90 @@
+
+    Position new_pos, max_pos;
+    new_pos.x = room->player.position.x + vector.x;
+    new_pos.y = room->player.position.y + vector.y;
+
+    /* Y+ SE */
+    if(room->tiles[(int) player_tile.y + 1][(int) player_tile.x + 1].type == WALL
+       && room->player.position.x >= player_tile.x + 0.5) {
+        max_pos.y =  player_tile.y + 1 - sqrt(fabs(0.25 - pow(player_tile.x + 1 - room->player.position.x, 2)));
+        vector.y = new_pos.y > max_pos.y ? 0 : vector.y;
+    }
+    /* Y+ SO */
+    if(room->tiles[(int) player_tile.y + 1][(int) player_tile.x - 1].type == WALL
+       && room->player.position.x <= player_tile.x + 0.5) {
+        max_pos.y =  player_tile.y + 1 - sqrt(fabs(0.25 - pow(room->player.position.x - player_tile.x, 2)));
+        vector.y = new_pos.y > max_pos.y ? 0 : vector.y;
+    }
+    /* X+ NE */
+    if(room->tiles[(int) player_tile.y - 1][(int) player_tile.x + 1].type == WALL
+       && room->player.position.y >= player_tile.y + 0.5) {
+        max_pos.x =  player_tile.x + 1 - sqrt(fabs(0.25 - pow(room->player.position.y - player_tile.y, 2)));
+        vector.x = new_pos.x > max_pos.x ? 0 : vector.x;
+    }
+    /* X+ SE */
+    if(room->tiles[(int) player_tile.y + 1][(int) player_tile.x + 1].type == WALL
+       && room->player.position.y <= player_tile.y + 0.5) {
+        max_pos.x =  player_tile.x + 1 - sqrt(fabs(0.25 - pow(player_tile.y + 1 - room->player.position.y, 2)));
+        vector.x = new_pos.x > max_pos.x ? 0 : vector.x;
+    }
+
+
+    /* More restrictive */
+    max_pos.y = player_tile.y + 0.5;
+    max_pos.x = player_tile.x + 0.5;
+    /* N */
+    if(room->tiles[(int) player_tile.y - 1][(int) player_tile.x].type == WALL)
+        vector.y = new_pos.y < max_pos.y ? 0 : vector.y;
+    /* S */
+    if(room->tiles[(int) player_tile.y + 1][(int) player_tile.x].type == WALL)
+        vector.y = new_pos.y > max_pos.y ? 0 : vector.y;
+    /* E */
+    if(room->tiles[(int) player_tile.y][(int) player_tile.x + 1].type == WALL)
+        vector.x = new_pos.x > max_pos.x ? 0 : vector.x;
+    /* O */
+    if(room->tiles[(int) player_tile.y][(int) player_tile.x - 1].type == WALL)
+        vector.x = new_pos.x < max_pos.x ? 0 : vector.x;
+
+    room->player.position.x += vector.x;
+    room->player.position.y += vector.y;
+
+
+
+
+
+
+
+-------------------------------------------------------------------
+
+
+Position new_pos;
+    new_pos.x = room->player.position.x + vector.x;
+    new_pos.y = room->player.position.y + vector.y;
+    room->player.position = new_pos;
+    Position tl = {
+            .x = MAX(0, MIN((int) room->player.position.x, (int) new_pos.x) - 1),
+            .y = MAX(0, MIN((int) room->player.position.y, (int) new_pos.y) - 1),
+    };
+    Position br = {
+            .x = MIN(ROOM_WIDTH, MAX((int) room->player.position.x, (int) new_pos.x) + 1),
+            .y = MIN(ROOM_HEIGHT, MAX((int) room->player.position.y, (int) new_pos.y) + 1),
+    };
+    int y, x;
+    for(y = (int) tl.y; y <= br.y; y++){
+        for(x = (int) tl.x; x <= br.x; x++){
+            if(room->tiles[y][x].type == WALL){
+                Position nearest = {
+                        .x = CLAMP(x, room->player.position.x, x + 1),
+                        .y = CLAMP(y, room->player.position.y, y + 1)
+                };
+                Position distance;
+                position_sub(&room->player.position, &nearest,  &distance);
+                double vector_norm = vector_mag(&distance);
+                if(0.5 - vector_norm > 0){ /* collide */
+                    room->player.position.x = nearest.x + 0.5 * (distance.x / vector_norm);
+                    room->player.position.y = nearest.y + 0.5 * (distance.y / vector_norm);
+                }
+
+            }
+        }
+    }

@@ -16,12 +16,12 @@ typedef enum {
 } TileType;
 
 typedef struct {
-    TileType tile_type;
+    TileType type;
     int mana;
     int caught;
 } Tile;
 
-void init_tile(Tile *tile, TileType tile_type);
+void init_tile(Tile *tile, TileType type);
 
 void print_tile(Tile tile);
 

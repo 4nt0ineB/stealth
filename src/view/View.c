@@ -64,7 +64,7 @@ void view_init(){
 
 void view_draw_info(Room *room){
     static char buffer[40] = {0};
-    draw_rectangle(&View.info_area, MLV_COLOR_GRAY77);
+    draw_rectangle(&View.info_area, MLV_COLOR_GRAY50);
     timer_sprintf(View.timer, buffer);
     MLV_draw_text_with_font(
             View.info_area.w / 2
@@ -111,7 +111,7 @@ void view_update_size(int w, int h){
 void view_draw_util(){
     static char buffer[10] = {0};
     /* */
-    draw_rectangle(&View.available_area, MLV_COLOR_DARK_RED);
+    draw_rectangle(&View.available_area, MLV_rgba(41, 52, 71,255));
     sprintf(buffer, "%d fps", MLV_get_frame_rate());
     MLV_draw_text_with_font(View.info_area.w - View.info_area.w / 5
                             , View.info_area.origin.y + View.info_area.h / 3
@@ -133,7 +133,7 @@ void view_draw_room(Room *room){
     /* Draw lines */
     int ox = View.game_area.origin.x;
     int oy = View.game_area.origin.y;
-    int thickness = 2;
+    int thickness = 1;
     for(i = 0; i < ROOM_HEIGHT; i++){
         MLV_draw_filled_rectangle(
                 ox
@@ -157,7 +157,7 @@ void view_draw_room(Room *room){
             /*
              * @Todo delegate
              * */
-            switch (room->room[i][j].tile_type) {
+            switch (room->tiles[i][j].type) {
                 case WALL:
                     MLV_draw_filled_rectangle(
                             ox + j * SIDE
@@ -176,22 +176,22 @@ void view_draw_room(Room *room){
 
     /* Player */
     MLV_draw_filled_circle(
-            ox + room->player.x
-            , oy + room->player.y
+            ox +room->player.position.x * SIDE
+            , oy + room->player.position.y * SIDE
             , SIDE / 2
             , MLV_COLOR_RED);
 
     /* Guards */
     for(i = 0; i < GUARD_NUMBER; i++){
         MLV_draw_filled_circle(
-                ox + room->guards[i].x
-                , oy + room->guards[i].y
+                ox + room->guards[i].position.x * SIDE
+                , oy + room->guards[i].position.y * SIDE
                 , SIDE / 2
                 , MLV_COLOR_BLUE);
 
         MLV_draw_circle(
-                ox + room->guards[i].x
-                , oy + room->guards[i].y
+                ox + room->guards[i].position.x * SIDE
+                , oy + room->guards[i].position.y * SIDE
                 , SIDE * 4 /* @Todo: to change. The guard must have a vision range */
                 , MLV_COLOR_BLUE);
     }

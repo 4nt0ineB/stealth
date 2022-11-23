@@ -14,17 +14,26 @@
 #ifndef STEALTH_SETTINGS_H
 #define STEALTH_SETTINGS_H
 
-
 /* Frames per second */
 #define FPS 60
-/* Square per second */
-#define SPS 1
-
+/* Square per second (v) */
+#define SPS 10
+#define PLAYER_INIT_SPEED 0.1
+#define PLAYER_INCR_SPEED 0.03
+#define PLAYER_MAX_SPEED 0.9
+#define COMPUTE_MOVE_DIST(v) (((v) * SPS) / FPS)
 
 #define ROOM_HEIGHT 45
 #define ROOM_WIDTH 60
 
 #define GUARD_NUMBER 5
+#define GUARD_NEW_DIR_PROBABILITY 0.02
+#define GUARD_MIN_SPEED 0.3
+#define GUARD_MAX_SPEED 0.8
+#define GUARD_VIEW_RANGE 4
+#define GUARD_PANIC_SPEED 1
+#define GUARD_PANIC_VIEW_RANGE 6
+
 
 /**
  * Global of the size of a Tile

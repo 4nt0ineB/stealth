@@ -9,6 +9,8 @@
 #ifndef STEALTH_UTIL_H
 #define STEALTH_UTIL_H
 
+#define SQRT2 1.414213562
+
 /**
  * @file Util.h
  * @brief Useful functions used across the project
@@ -17,9 +19,12 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) < (b) ? (b) : (a))
+#define CLAMP(min, val, max) (MAX(min, MIN(max, val)))
+
 
 /**
- * Return a random int between two values
+ * Return a random int between two values.
+ * [a,b]
  * @param a
  * @param b
  * @return

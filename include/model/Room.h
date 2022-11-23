@@ -19,7 +19,7 @@
 #define MINSIDE 9
 
 typedef struct {
-    Tile room[ROOM_HEIGHT][ROOM_WIDTH];
+    Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
     Character player;
     Guard guards[GUARD_NUMBER];
 } Room;
@@ -27,5 +27,25 @@ typedef struct {
 void init_room(Room *new_room);
 
 void print_room(Room room);
+
+
+/**
+ * Test if the entity is colliding a wall of the room
+ * and respond to the collision by moving the entity to
+ * the appropriate position.
+ * @param room
+ * @param position
+ * @return 1 if entity has collided 0 if not
+ */
+int room_resolve_collision(Room *room, Position *position);
+
+/**
+ * Moves the player according to a given direction
+ * @param room
+ * @param direction
+ */
+void room_move_player(Room *room, Direction direction);
+
+void room_move_guards(Room *room);
 
 #endif /* STEALTH_ROOM_H */

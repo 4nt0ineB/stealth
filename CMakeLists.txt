@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.22.3)
 project(stealth C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 90)
 
 include_directories(include)
 include_directories(include/controller)
@@ -35,9 +35,11 @@ add_executable(stealth
         src/core/geometry/Circle.c
         include/core/geometry/Circle.h
         src/core/Util.c
-        include/core/Util.h src/core/Settings.c src/core/Timer.c include/core/Timer.h)
+        include/core/Util.h src/core/Settings.c
+        src/core/Timer.c
+        include/core/Timer.h)
 
-target_link_libraries(${PROJECT_NAME} MLV)
+target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros
 add_compile_definitions(RESOURCES_DIR="../resources/")
 add_compile_definitions(DEFAULT_WIN_W_PERCENT=70)
