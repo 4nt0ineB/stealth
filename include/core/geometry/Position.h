@@ -30,4 +30,8 @@ void position_print(Position *position);
  */
 void position_init(Position *position, int x, int y);
 
+void position_sub(const Position *a, const Position *b, Position *result);
+
+double vector_mag(const Vector *v);
+
 #endif /* STEALTH_POSITION_H */

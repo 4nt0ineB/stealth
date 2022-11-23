@@ -5,7 +5,7 @@
 #include "core/Timer.h"
 #include <MLV/MLV_all.h>
 
-static inline Direction get_direction();
+static Direction get_direction();
 
 int slealth_controller(Room *room) {
     int run = 1;
@@ -40,7 +40,7 @@ int slealth_controller(Room *room) {
 }
 
 
-static inline Direction get_direction() {
+static Direction get_direction() {
     static Direction direction;
     if (!MLV_get_keyboard_state(MLV_KEYBOARD_z)
         && !MLV_get_keyboard_state(MLV_KEYBOARD_d))

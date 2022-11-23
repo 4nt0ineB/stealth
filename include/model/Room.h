@@ -19,7 +19,7 @@
 #define MINSIDE 9
 
 typedef struct {
-    Tile room[ROOM_HEIGHT][ROOM_WIDTH];
+    Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
     Character player;
     Guard guards[GUARD_NUMBER];
 } Room;

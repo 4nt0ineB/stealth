@@ -157,7 +157,7 @@ void view_draw_room(Room *room){
             /*
              * @Todo delegate
              * */
-            switch (room->room[i][j].type) {
+            switch (room->tiles[i][j].type) {
                 case WALL:
                     MLV_draw_filled_rectangle(
                             ox + j * SIDE
@@ -176,16 +176,16 @@ void view_draw_room(Room *room){
 
     /* Player */
     MLV_draw_filled_circle(
-            ox + room->player.position.x
-            , oy + room->player.position.y
+            ox + room->player.position.x * SIDE
+            , oy + room->player.position.y * SIDE
             , SIDE / 2
             , MLV_COLOR_RED);
 
     /* Guards */
     for(i = 0; i < GUARD_NUMBER; i++){
         MLV_draw_filled_circle(
-                ox + room->guards[i].x
-                , oy + room->guards[i].y
+                ox + room->guards[i].x * SIDE
+                , oy + room->guards[i].y * SIDE
                 , SIDE / 2
                 , MLV_COLOR_BLUE);
 
