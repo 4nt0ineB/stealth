@@ -16,7 +16,7 @@ int main(int args, char *argv[]){
     /* TESTING ROOM FUNCTIONS */
     Room room;
     init_room(&room);
-    print_room(room);
+  /*  print_room(room);*/
     return slealth_controller(&room);
     return 0;
 }

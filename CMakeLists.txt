@@ -35,7 +35,7 @@ add_executable(stealth
         src/core/geometry/Circle.c
         include/core/geometry/Circle.h
         src/core/Util.c
-        include/core/Util.h src/core/Settings.c src/core/Timer.c include/core/Timer.h)
+        include/core/Util.h src/core/Settings.c src/core/Timer.c include/core/Timer.h src/model/Entity.c include/model/Entity.h)
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros

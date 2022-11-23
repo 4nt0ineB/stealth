@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "model/Room.h"
+#include "model/Entity.h"
 #include "core/Util.h"
 
 void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
@@ -109,6 +110,10 @@ static void get_tile_index_from_coordinates(Position *position, Position *result
     result_indexes->y = (int) position->y;
 }
 
+void room_move_entity(Room *room, Direction direction, Entity *entity){
+
+}
+
 void room_move_player(Room *room, Direction direction){
     assert(room);
     Position player_tile;
@@ -120,52 +125,36 @@ void room_move_player(Room *room, Direction direction){
     vector.x = COMPUTE_MOVE_DIST(room->player.speed) * direction_factor[direction][0];
     vector.y = COMPUTE_MOVE_DIST(room->player.speed) * direction_factor[direction][1];
     /* Test collisions */
-    /* To put in another method to handle any entity */
-    /* S */
-    Position new_pos, max_pos;
-
+    Position new_pos;
     new_pos.x = room->player.position.x + vector.x;
     new_pos.y = room->player.position.y + vector.y;
-
-    Position target_tile = new_pos;
+    room->player.position = new_pos;
+    Position tl = {
+            .x = MAX(0, MIN((int) room->player.position.x, (int) new_pos.x) - 1),
+            .y = MAX(0, MIN((int) room->player.position.y, (int) new_pos.y) - 1),
+    };
+    Position br = {
+            .x = MIN(ROOM_WIDTH, MAX((int) room->player.position.x, (int) new_pos.x) + 1),
+            .y = MIN(ROOM_HEIGHT, MAX((int) room->player.position.y, (int) new_pos.y) + 1),
+    };
     int y, x;
-    for(y = (int) target_tile.y - 1; y <= target_tile.y + 1; y++){
-        for(x = (int) target_tile.x - 1; x <= target_tile.x + 1; x++){
+    for(y = (int) tl.y; y <= br.y; y++){
+        for(x = (int) tl.x; x <= br.x; x++){
             if(room->tiles[y][x].type == WALL){
                 Position nearest = {
-                        .x = MAX(x, MIN((double)new_pos.x, (double) (x + 1))),
-                        .y = MAX(y, MIN((double)new_pos.y, (double) (y + 1)))
+                        .x = CLAMP(x, room->player.position.x, x + 1),
+                        .y = CLAMP(y, room->player.position.y, y + 1)
                 };
-                Position ray;
-                position_sub(&nearest, &new_pos, &ray);
-                double overlap = 0.5 - vector_mag(&ray);
-
-                if(overlap > 0){
-                    printf("Overlap : %f\n", overlap);
-                    Position offset = {
-                        .x = nearest.x - new_pos.x,
-                        .y = nearest.y - new_pos.y
-                    };
-                    double distance = sqrt(pow(offset.x, 2) + pow(offset.y, 2));
-                    Position direction = {
-                            .x = offset.x / distance,
-                            .y = offset.y / distance
-                    };
-                    double len = 0.5 - distance;
-                    new_pos.x = room->player.position.x + len * direction.x;
-                    new_pos.y = room->player.position.y + len * direction.y;
+                Position distance;
+                position_sub(&room->player.position, &nearest,  &distance);
+                double vector_norm = vector_mag(&distance);
+                if(0.5 - vector_norm > 0){ /* collide */
+                    room->player.position.x = nearest.x + 0.5 * (distance.x / vector_norm);
+                    room->player.position.y = nearest.y + 0.5 * (distance.y / vector_norm);
                 }
+
             }
         }
-
     }
-
-    room->player.position.x =  new_pos.x;
-    room->player.position.y =  new_pos.y;
-/*
-    room->player.position.x += vector.x;
-    room->player.position.y += vector.y;*/
-
-
 
 }
