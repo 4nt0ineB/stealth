@@ -24,10 +24,9 @@ typedef struct {
     Guard guards[GUARD_NUMBER];
 } Room;
 
-void init_room(Room *new_room);
+void room_init(Room *room);
 
-void print_room(Room room);
-
+void room_print(Room room);
 
 /**
  * Test if the entity is colliding a wall of the room
@@ -46,6 +45,25 @@ int room_resolve_collision(Room *room, Position *position);
  */
 void room_move_player(Room *room, Direction direction);
 
+/**
+ * Moves the guards of the room
+ * @param room
+ */
 void room_move_guards(Room *room);
+
+/**
+ * Check if a tile of a given type is on the
+ * segment formed by to position
+ * @param room
+ * @param p1
+ * @param p2
+ * @param tile_type
+ * @return 1 if true, otherwise 0
+ */
+int room_tile_between(const Room *room, const Position *p1, const Position *p2, TileType tile_type);
+
+
+void room_check_guard_panic(Room *room);
+
 
 #endif /* STEALTH_ROOM_H */

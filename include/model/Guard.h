@@ -15,7 +15,7 @@
  */
 
 typedef struct {
-    int panick_mode;
+    int panic_mode;
     Direction direction; /*<! Need to store the direction to detect a change of direction */
     double speed;
     Position position; /*<!  The coordinates where the entity is (not the cell index it is on)  */
@@ -44,5 +44,7 @@ void guard_unpanick(Guard *guard);
 Direction guard_update_direction(Guard *guard);
 
 void guard_update_speed(Guard *guard);
+
+double guard_view_range(const Guard *guard);
 
 #endif /* STEALTH_GUARD_H */

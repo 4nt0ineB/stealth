@@ -10,4 +10,6 @@
 
 /* Module that implements the relics of the game and all their functionalities */
 
+
+
 #endif /* STEALTH_RELIC_H */
