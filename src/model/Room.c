@@ -64,30 +64,46 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
     }
 }
 
-void init_room(Room *new_room){
-    int i, j;
+/**
+ * Get a random tile index not of given type
+ * @param room
+ * @param tile_type the type of tile to exclude
+ * @return 1 if indexes found, otherwise 0
+ */
+static int room_random_position(Room *room, TileType tile_type, int *res_x, int *res_y){
+    assert(room);
+    do{
+        *res_x = int_rand(1, ROOM_WIDTH - 1);
+        *res_y = int_rand(1, ROOM_HEIGHT - 1);
+    }while(room->tiles[*res_y][*res_x].type == tile_type);
+    return 1;
+}
+
+void room_init(Room *room){
+    int i, j, x, y;
 
     /* Puting outside Walls all over the rectangle sides */
     for (i = 0; i < ROOM_HEIGHT; i++){
         for (j = 0; j < ROOM_WIDTH; j++){
             if (i == 0 || j == 0 || j == ROOM_WIDTH - 1 || i == ROOM_HEIGHT - 1)
-                init_tile(&(new_room->tiles[i][j]), WALL);
+                init_tile(&(room->tiles[i][j]), WALL);
             else
-                init_tile(&(new_room->tiles[i][j]), TILE);
+                init_tile(&(room->tiles[i][j]), TILE);
         }
     }
 
     /* Generate inside walls*/
-    generate_room(new_room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
+    generate_room(room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
 
-    character_init(&(new_room->player), 2,  2); /* Not good values just to test*/
-    for(i = 0; i < GUARD_NUMBER; i++)
-        guard_init(&(new_room->guards[i])
-                   , int_rand(1, ROOM_WIDTH - 1) /* @Todo test if position is not a wall before */
-                   , int_rand(1, ROOM_WIDTH - 1));
+    /* Not good values just to test*/
+    character_init(&(room->player), 2, 2);
+    for(i = 0; i < GUARD_NUMBER; i++){
+        room_random_position(room, WALL, &x, &y);
+        guard_init(&(room->guards[i]) , x, y);
+    }
 }
 
-void print_room(Room room){
+void room_print(Room room){
     int i, j;
     for (i = 0; i < ROOM_HEIGHT; i++){
         for (j = 0; j < ROOM_WIDTH; j++) {
@@ -124,11 +140,13 @@ int room_resolve_collision(Room *room, Position *position){
                 /* distance of this point to the center of the circle */
                 Position distance;
                 position_sub(position, &nearest,  &distance);
-                double vector_norm = vector_mag(&distance);
-                if(0.5 - vector_norm > 0){
+                /* Distance to this point */
+                double norm = vector_mag(&distance);
+                if(0.5 - norm > 0){
                     collide = 1;
-                    position->x = nearest.x + 0.5 * (distance.x / vector_norm);
-                    position->y = nearest.y + 0.5 * (distance.y / vector_norm);
+                    /* Set back the position of the circle to the legit position */
+                    position->x = nearest.x + 0.5 * (distance.x / norm);
+                    position->y = nearest.y + 0.5 * (distance.y / norm);
                 }
             }
         }
@@ -136,6 +154,12 @@ int room_resolve_collision(Room *room, Position *position){
     return collide;
 }
 
+/**
+ * Moves the entity by a given Velocity (speed and direction)
+ * @param position
+ * @param speed
+ * @param direction
+ */
 static void entity_move(Position *position, double speed, Direction direction){
     assert(position);
     position->x += COMPUTE_MOVE_DIST(speed) * direction_factor[direction][0];
@@ -153,6 +177,7 @@ void room_move_player(Room *room, Direction direction){
 }
 
 void room_move_guards(Room *room){
+    assert(room);
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
         guard_update_speed(&room->guards[i]);
@@ -163,6 +188,55 @@ void room_move_guards(Room *room){
             /* The guard is hitting the wall, so the speed and the direction must be updated */
             guard_update_speed(&room->guards[i]);
             guard_update_direction(&room->guards[i]);
+        }
+    }
+}
+
+int room_tile_between(const Room *room, const Position *p1, const Position *p2, TileType tile_type){
+
+    int i;
+    double xa;
+    Position abs_p0, abs_p1, pos_a;
+    Position tmp;
+
+    for(i = 0; i < ROOM_HEIGHT; i++){
+        /* check if on segment */
+        xa = (i - p1->y) / (p2->y - p1->y);
+        if(xa >= 0 && xa <= 1){
+            pos_a.y = i;
+            position_interpolate_with_x(p1, p2, &pos_a);
+            tmp.x = (int) pos_a.x;
+            tmp.y = (int) pos_a.y;
+            if(room->tiles[(int) tmp.y][(int) tmp.x].type == tile_type)
+                return 1;
+        }
+    }
+
+    for(i = 0; i < ROOM_WIDTH; i++){
+        xa = (i - p1->x) / (p2->x - p1->x);
+        /* check if on segment */
+        if(xa >= 0 && xa <= 1){
+            pos_a.x = i;
+            position_interpolate_with_y(p1, p2, &pos_a);
+            tmp.x = (int) pos_a.x;
+            tmp.y = (int) pos_a.y;
+            if(room->tiles[(int) tmp.y][(int) tmp.x].type == tile_type)
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
+void room_check_guard_panic(Room *room){
+    int i;
+    for(i = 0; i < GUARD_NUMBER; i++){
+        if(position_dist(&room->guards[i].position, &room->player.position)
+           < guard_view_range(&room->guards[i])
+        && !room_tile_between(room, &room->guards[i].position, &room->player.position, WALL)){
+            guard_panick(&room->guards[i]);
+        }else{
+            guard_unpanick(&room->guards[i]);
         }
     }
 }

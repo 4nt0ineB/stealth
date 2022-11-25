@@ -9,6 +9,6 @@
 int main(int args, char *argv[]){
     srand(time(NULL));
     Room room;
-    init_room(&room);
+    room_init(&room);
     return slealth_controller(&room);
 }

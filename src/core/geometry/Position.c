@@ -21,6 +21,11 @@ void position_init(Position *position, int x, int y){
     position->y = y;
 }
 
+double position_dist(const Position *a, const Position *b){
+    return sqrt((b->x - a->x) * (b->x - a->x)
+    + (b->y - a->y) * (b->y - a->y));
+}
+
 void position_sub(const Position *a, const Position *b, Position *result){
     assert(a && b && result);
     result->x = a->x - b->x;
@@ -30,4 +35,12 @@ void position_sub(const Position *a, const Position *b, Position *result){
 double vector_mag(const Vector *v){
     assert(v);
     return sqrt(v->x * v->x + v->y * v->y);
+}
+
+void position_interpolate_with_x(const Position *a, const Position *b, Position *to_find){
+    to_find->x = a->x + ((b->x - a->x) / (b->y - a->y)) * (to_find->y - a->y);
+}
+
+void position_interpolate_with_y(const Position *a, const Position *b, Position *to_find){
+    to_find->y = a->y + ((b->y - a->y) / (b->x - a->x)) * (to_find->x - a->x);
 }

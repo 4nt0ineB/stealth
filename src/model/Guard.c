@@ -12,7 +12,7 @@ void guard_init(Guard *guard, int x, int y) {
     guard->position.y = y;
     guard->speed = float_rand(GUARD_MIN_SPEED, GUARD_MAX_SPEED);
     guard->direction = STILL;
-    guard->panick_mode = 0;
+    guard->panic_mode = 0;
 }
 
 void guard_update_speed(Guard *guard){
@@ -35,14 +35,20 @@ Direction guard_update_direction(Guard *guard){
     return guard->direction;
 }
 
+double guard_view_range(const Guard *guard){
+    if(guard->panic_mode)
+        return GUARD_PANIC_VIEW_RANGE;
+    return GUARD_VIEW_RANGE;
+}
+
 void guard_panick(Guard *guard){
     assert(guard);
-    guard->panick_mode = 1;
+    guard->panic_mode = 1;
 }
 
 void guard_unpanick(Guard *guard){
     assert(guard);
-    guard->panick_mode = 1;
+    guard->panic_mode = 0;
 }
 
 

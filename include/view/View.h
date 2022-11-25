@@ -36,7 +36,7 @@ void view_draw_util();
  * @param w
  * @param h
  */
-void view_draw_room(Room *room);
+void view_draw_room(const Room *room);
 
 /**
  * Resize the window
@@ -49,7 +49,7 @@ void view_update_size(int w, int h);
 /**
  * Draw the info area
  */
-void view_draw_info(Room *room);
+void view_draw_info(const Room *room);
 
 /**
  * close the view
@@ -62,11 +62,13 @@ void view_free();
  * @param rectangle
  * @param color
  */
-void draw_rectangle(Rectangle *rectangle, MLV_Color color);
+void draw_rectangle(const Rectangle *rectangle, MLV_Color color);
 
 /**
  * Update the elapsed time
  */
 void view_update_time();
+
+void draw_intersections_with_tiles(const Room *room, const Position *p1, const Position *p2);
 
 #endif /* STEALTH_VIEW_H */

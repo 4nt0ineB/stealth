@@ -62,7 +62,7 @@ void view_init(){
 }
 
 
-void view_draw_info(Room *room){
+void view_draw_info(const Room *room){
     static char buffer[40] = {0};
     draw_rectangle(&View.info_area, MLV_COLOR_GRAY50);
     timer_sprintf(View.timer, buffer);
@@ -120,7 +120,37 @@ void view_draw_util(){
                             ,MLV_COLOR_BLACK);
 }
 
-void view_draw_room(Room *room){
+static int view_get_absolute_position(const Position *position, Position *result){
+    result->x = View.game_area.origin.x + position->x * SIDE;
+    result->y = View.game_area.origin.y + position->y * SIDE;
+}
+
+void view_draw_player(const Character *character){
+    Position pos;
+    view_get_absolute_position(&character->position, &pos);
+    MLV_draw_filled_circle(pos.x, pos.y, SIDE / 2, MLV_COLOR_RED);
+}
+
+void view_draw_guard(const Guard *guard){
+    Position pos;
+    MLV_Color color;
+    color = MLV_COLOR_BLUE;
+    if(guard->panic_mode) color = MLV_COLOR_YELLOW;
+    view_get_absolute_position(&guard->position, &pos);
+    MLV_draw_filled_circle(
+            pos.x
+            , pos.y
+            , SIDE / 2
+            , color);
+
+    MLV_draw_circle(
+            pos.x
+            , pos.y
+            , SIDE * 4 /* @Todo: to change. The guard must have a vision range */
+            , color);
+}
+
+void view_draw_room(const Room *room){
     /*
      * The absolute position of any object of the room to be drawn
      * is determined here !
@@ -175,25 +205,12 @@ void view_draw_room(Room *room){
     }
 
     /* Player */
-    MLV_draw_filled_circle(
-            ox +room->player.position.x * SIDE
-            , oy + room->player.position.y * SIDE
-            , SIDE / 2
-            , MLV_COLOR_RED);
+    view_draw_player(&room->player);
 
     /* Guards */
     for(i = 0; i < GUARD_NUMBER; i++){
-        MLV_draw_filled_circle(
-                ox + room->guards[i].position.x * SIDE
-                , oy + room->guards[i].position.y * SIDE
-                , SIDE / 2
-                , MLV_COLOR_BLUE);
+        view_draw_guard(&room->guards[i]);
 
-        MLV_draw_circle(
-                ox + room->guards[i].position.x * SIDE
-                , oy + room->guards[i].position.y * SIDE
-                , SIDE * 4 /* @Todo: to change. The guard must have a vision range */
-                , MLV_COLOR_BLUE);
     }
 }
 
@@ -202,12 +219,71 @@ void view_free(){
     MLV_free_window();
 }
 
-void draw_rectangle(Rectangle *rectangle, MLV_Color color){
+void draw_rectangle(const Rectangle *rectangle, const MLV_Color color){
     MLV_draw_filled_rectangle(
-            rectangle->origin.x
-            , rectangle->origin.y
-            , rectangle->w
-            , rectangle->h
-            , color
-    );
+            rectangle->origin.x, rectangle->origin.y
+            , rectangle->w, rectangle->h, color);
+}
+
+
+void draw_intersections_with_tiles(const Room *room, const Position *p1, const Position *p2){
+    assert(p1 && p2);
+    /* draw line between positions */
+    Position abs_pos1, abs_pos2;
+    view_get_absolute_position(p1, &abs_pos1);
+    view_get_absolute_position(p2, &abs_pos2);
+    MLV_draw_line(abs_pos1.x,abs_pos1.y,
+                  abs_pos2.x,abs_pos2.y,MLV_COLOR_BLACK);
+
+    /* draw intersection */
+    int i;
+    double xa;
+    Position abs_p0, abs_p1, pos_a;
+    Position tmp;
+
+    for(i = 0; i < ROOM_HEIGHT; i++){
+        xa = (i - p1->y) / (p2->y - p1->y);
+        if(xa >= 0 && xa <= 1){ /* check if on segment */
+            pos_a.y = i;
+            position_interpolate_with_x(p1, p2, &pos_a);
+            tmp.x = (int) pos_a.x;
+            tmp.y = (int) pos_a.y;
+            /* enhance if wall */
+            if(room->tiles[(int) tmp.y][(int) tmp.x].type == WALL) {
+                view_get_absolute_position(&tmp, &tmp);
+                MLV_draw_filled_rectangle(
+                        tmp.x,
+                        tmp.y,
+                        SIDE, SIDE,
+                        MLV_COLOR_RED
+                );
+            }
+            view_get_absolute_position(&pos_a, &pos_a);
+            MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_GREEN);
+        }
+    }
+
+    for(i = 0; i < ROOM_WIDTH; i++){
+        xa = (i - p1->x) / (p2->x - p1->x);
+        if(xa >= 0 && xa <= 1){ /* check if on segment */
+            pos_a.x = i;
+            position_interpolate_with_y(p1, p2, &pos_a);
+            tmp.x = (int) pos_a.x;
+            tmp.y = (int) pos_a.y;
+            /* enhance if wall */
+            if(room->tiles[(int) tmp.y][(int) tmp.x].type == WALL) {
+                view_get_absolute_position(&tmp, &tmp);
+                MLV_draw_filled_rectangle(
+                        tmp.x,
+                        tmp.y,
+                        SIDE, SIDE,
+                        MLV_COLOR_RED
+                );
+            }
+            view_get_absolute_position(&pos_a, &pos_a);
+            MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_ORANGE);
+        }
+    }
+
+
 }
