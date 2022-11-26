@@ -235,17 +235,39 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
     return 0;
 }
 
+/* Not in the API ? i guess not cause useless outside other functions ?*/
+static void room_make_guards_panick(Room *room){
+    int i;
+    for(i = 0; i < GUARD_NUMBER; i++){
+        if (room->guards[i].panic_mode){
+            /* Then his panick count is reseted */
+            guard_reset_panick_count(&room->guards[i]);
+        } else guard_panick(&room->guards[i]);
+    }
+}
+
 void room_check_guard_panic(Room *room){
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
+        if (room->guards[i].panic_mode){
+            guard_update_panick_count(&room->guards[i]);
+        }
         if(position_dist(&room->guards[i].position, &room->player.position)
            < guard_view_range(&room->guards[i])
         && !room_tile_between(room, &room->guards[i].position, &room->player.position, WALL)){
             guard_panick(&room->guards[i]);
-        }else{
-            guard_unpanick(&room->guards[i]);
-        }
+        } 
+        /*
+        if (this guard sees relic has disapeared)
+            -> make a variable go to 1 
+            avoiding if multiple guards sees a relic missing at the same 
+            time to do a loop over all guards every time
+        */
     }
+    /*
+    if (variable)
+        -> room_make_guards_panick(room);
+    */
 }
 
 void room_check_player(Room *room){

@@ -1,11 +1,4 @@
-#include "core/Settings.h"
-
 #include "model/Guard.h"
-#include "core/Util.h"
-
-#include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
 
 void guard_init(Guard *guard, int x, int y) {
     guard->position.x = x;
@@ -13,6 +6,7 @@ void guard_init(Guard *guard, int x, int y) {
     guard->speed = float_rand(GUARD_MIN_SPEED, GUARD_MAX_SPEED);
     guard->direction = STILL;
     guard->panic_mode = 0;
+    guard->panic_count = 0; /* To count the time he has been in panic mode*/
 }
 
 void guard_update_speed(Guard *guard){
@@ -21,9 +15,9 @@ void guard_update_speed(Guard *guard){
     if(int_rand(0, 99) <= GUARD_NEW_DIR_PROBABILITY * 100){
         speed = float_rand(GUARD_MIN_SPEED, GUARD_MAX_SPEED);
     }
-    /*if(guard->panick_mode){
-        speed = ...
-    }*/
+    if(guard->panic_mode){
+        speed = GUARD_PANIC_SPEED;
+    }
     guard->speed = speed;
 }
 
@@ -51,4 +45,18 @@ void guard_unpanick(Guard *guard){
     guard->panic_mode = 0;
 }
 
+void guard_reset_panick_count(Guard *guard){
+    assert(guard);
+    guard->panic_count = 0;
+}
 
+void guard_update_panick_count(Guard *guard){
+    assert(guard);
+    if (guard->panic_mode){
+        if (guard->panic_count >= GUARD_PANIC_DURATION){
+            guard_reset_panick_count(guard);
+            guard_unpanick(guard);
+        }
+        guard->panic_count++;
+    }
+}
