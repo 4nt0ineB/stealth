@@ -42,6 +42,8 @@ static struct {
     */
 } View;
 
+static int SIDE = 0;
+
 void view_init(){
     View.bg_color = MLV_COLOR_BLACK;
     MLV_create_window("Slealth", "", 1, 1);
@@ -66,16 +68,75 @@ void view_draw_info(const Room *room){
     static char buffer[40] = {0};
     draw_rectangle(&View.info_area, MLV_COLOR_GRAY50);
     timer_sprintf(View.timer, buffer);
+    /* Draw timer */
     MLV_draw_text_with_font(
             View.info_area.w / 2
             , View.info_area.origin.y + View.info_area.h / 3
             , buffer
             , View.font
             ,MLV_COLOR_BLACK);
+
+    /* Draw mana bar */
+    int bar_w = View.info_area.w * 0.1;
+    int bar_h = View.info_area.h * 0.3;
+    Rectangle mana_bar = {
+        .origin = {
+                .x = View.info_area.w - bar_w - View.info_area.w * 0.02,
+                .y = View.info_area.h - bar_h - View.info_area.h * 0.1
+        },
+        .w = bar_w,
+        .h = bar_h
+    };
+    /* bar background */
+    MLV_draw_filled_rectangle(mana_bar.origin.x
+                              , mana_bar.origin.y
+                              , mana_bar.w
+                              , mana_bar.h
+                              , MLV_COLOR_BLACK);
+    /* mana quantity */
+    Rectangle mana_quantity;
+    rectangle_with_padding(&mana_bar, 0.02, 0.05, &mana_quantity);
+
+    /* update to proportional quantity */
+    double max_mana =  (MANA_TILES_NUMBER / 4); /* for ux design purpose only */
+    double percentage = (MIN(room->player.mana, max_mana) * 100.0) / max_mana;
+    MLV_draw_filled_rectangle(mana_quantity.origin.x
+            , mana_quantity.origin.y
+            , (mana_quantity.w * percentage) / 100.0
+            , mana_quantity.h
+            , MLV_COLOR_CYAN2);
+    sprintf(buffer, "%d", room->player.mana);
+    /* draw number of mana */
+    MLV_draw_text_with_font(mana_quantity.origin.x + View.info_area.h * 0.1
+            , mana_quantity.origin.y - mana_quantity.h * 0.1
+            , buffer
+            , View.font
+            ,MLV_COLOR_DARK_GREY);
+
+    /* draw "mana" label */
+    int text_w;
+    MLV_get_size_of_text_with_font("Mana", &text_w, NULL, View.font);
+    MLV_draw_text_with_font(mana_quantity.origin.x - text_w - View.info_area.h * 0.1
+            , mana_quantity.origin.y
+            , "Mana"
+            , View.font
+            ,MLV_COLOR_WHITE);
 }
 
 void view_update_time(){
     timer_update(View.timer);
+}
+
+void view_draw_util(){
+    static char buffer[10] = {0};
+    /* draw framerate */
+    draw_rectangle(&View.available_area, MLV_rgba(41, 52, 71,255));
+    sprintf(buffer, "%d fps", MLV_get_frame_rate());
+    MLV_draw_text_with_font(View.available_area.w - View.available_area.w / 10
+            , View.available_area.h - View.available_area.h / 10
+            , buffer
+            , View.font
+            ,MLV_COLOR_ORANGE);
 }
 
 void view_update_size(int w, int h){
@@ -108,19 +169,9 @@ void view_update_size(int w, int h){
     MLV_change_window_size(w, h);
 }
 
-void view_draw_util(){
-    static char buffer[10] = {0};
-    /* */
-    draw_rectangle(&View.available_area, MLV_rgba(41, 52, 71,255));
-    sprintf(buffer, "%d fps", MLV_get_frame_rate());
-    MLV_draw_text_with_font(View.info_area.w - View.info_area.w / 5
-                            , View.info_area.origin.y + View.info_area.h / 3
-                            , buffer
-                            , View.font
-                            ,MLV_COLOR_BLACK);
-}
 
-static int view_get_absolute_position(const Position *position, Position *result){
+
+static void view_get_absolute_position(const Position *position, Position *result){
     result->x = View.game_area.origin.x + position->x * SIDE;
     result->y = View.game_area.origin.y + position->y * SIDE;
 }
@@ -197,7 +248,16 @@ void view_draw_room(const Room *room){
                             , MLV_COLOR_BLACK
                             );
                     break;
-                case TILE:
+                case MANA:
+                    MLV_draw_filled_rectangle(
+                            ox + j * SIDE
+                            , oy + i * SIDE
+                            , SIDE
+                            , SIDE
+                            , MLV_rgba(0, 162, 184,120)
+                    );
+                    break;
+                case EMPTY:
                 case RELIC:
                     break;
             }
@@ -238,8 +298,7 @@ void draw_intersections_with_tiles(const Room *room, const Position *p1, const P
     /* draw intersection */
     int i;
     double xa;
-    Position abs_p0, abs_p1, pos_a;
-    Position tmp;
+    Position pos_a, tmp;
 
     for(i = 0; i < ROOM_HEIGHT; i++){
         xa = (i - p1->y) / (p2->y - p1->y);

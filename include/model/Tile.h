@@ -10,18 +10,16 @@
 #include <stdio.h>
 
 typedef enum {
+    EMPTY,
     WALL,
-    TILE,
+    MANA,
     RELIC
 } TileType;
 
 typedef struct {
     TileType type;
-    int mana;
-    int caught;
 } Tile;
 
-void init_tile(Tile *tile, TileType type);
 
 void print_tile(Tile tile);
 

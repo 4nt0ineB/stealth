@@ -7,4 +7,3 @@
 
 #include "core/Settings.h"
 
-int SIDE = 0;

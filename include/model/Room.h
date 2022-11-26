@@ -65,5 +65,6 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
 
 void room_check_guard_panic(Room *room);
 
+void room_check_player(Room *room);
 
 #endif /* STEALTH_ROOM_H */

@@ -21,4 +21,7 @@ typedef struct rectangle {
  */
 void rectangle_print(Rectangle *rectangle);
 
+
+void rectangle_with_padding(const Rectangle *rectangle, double paddingx, double paddingy, Rectangle *result);
+
 #endif /* STEALTH_RECTANGLE_H */

@@ -31,9 +31,9 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
             i = y_min;
             j = y_max - 3;
         }
-        /* Creating the Wall that divide the 2 spaces at x / 2*/
+        /* Creating the Wall that divide the 2 spaces at x/2 */
         for (; i < j; i++)
-            init_tile(&(room->tiles[i][x_min + compartiment_x]), WALL);
+            room->tiles[i][x_min + compartiment_x].type = WALL;
         generate_room(room, x_min, y_min, compartiment_x + x_min, y_max);
         generate_room(room, compartiment_x + x_min, y_min, x_max, y_max);
     }
@@ -56,18 +56,18 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
             i = x_min;
             j = x_max - 3;
         }
-        /* Creating the Wall that divide the 2 spaces at x / 2*/
+        /* Creating the Wall that divide the 2 spaces at x/2 */
         for (; i < j; i++)
-            init_tile(&(room->tiles[compartiment_y + y_min][i]), WALL);
+            room->tiles[compartiment_y + y_min][i].type = WALL;
         generate_room(room, x_min, y_min, x_min, y_min + compartiment_y);
         generate_room(room, x_min, y_min + compartiment_y, x_max, y_max);
     }
 }
 
 /**
- * Get a random tile index not of given type
+ * Get a random tile index of a given type
  * @param room
- * @param tile_type the type of tile to exclude
+ * @param tile_type the type of tile to get
  * @return 1 if indexes found, otherwise 0
  */
 static int room_random_position(Room *room, TileType tile_type, int *res_x, int *res_y){
@@ -75,7 +75,7 @@ static int room_random_position(Room *room, TileType tile_type, int *res_x, int 
     do{
         *res_x = int_rand(1, ROOM_WIDTH - 1);
         *res_y = int_rand(1, ROOM_HEIGHT - 1);
-    }while(room->tiles[*res_y][*res_x].type == tile_type);
+    }while(room->tiles[*res_y][*res_x].type != tile_type);
     return 1;
 }
 
@@ -86,20 +86,26 @@ void room_init(Room *room){
     for (i = 0; i < ROOM_HEIGHT; i++){
         for (j = 0; j < ROOM_WIDTH; j++){
             if (i == 0 || j == 0 || j == ROOM_WIDTH - 1 || i == ROOM_HEIGHT - 1)
-                init_tile(&(room->tiles[i][j]), WALL);
+                room->tiles[i][j].type = WALL;
             else
-                init_tile(&(room->tiles[i][j]), TILE);
+                room->tiles[i][j].type = EMPTY;
         }
     }
 
     /* Generate inside walls*/
     generate_room(room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
 
-    /* Not good values just to test*/
+    /* player */
     character_init(&(room->player), 2, 2);
+    /* guards */
     for(i = 0; i < GUARD_NUMBER; i++){
-        room_random_position(room, WALL, &x, &y);
+        room_random_position(room, EMPTY, &x, &y);
         guard_init(&(room->guards[i]) , x, y);
+    }
+    /* mana */
+    for(i = 0; i < MANA_TILES_NUMBER; i++){
+        room_random_position(room, EMPTY, &x, &y);
+        room->tiles[y][x].type = MANA;
     }
 }
 
@@ -196,8 +202,7 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
 
     int i;
     double xa;
-    Position abs_p0, abs_p1, pos_a;
-    Position tmp;
+    Position pos_a, tmp;
 
     for(i = 0; i < ROOM_HEIGHT; i++){
         /* check if on segment */
@@ -238,5 +243,17 @@ void room_check_guard_panic(Room *room){
         }else{
             guard_unpanick(&room->guards[i]);
         }
+    }
+}
+
+void room_check_player(Room *room){
+    Position current_tile = {
+            .x = (int) room->player.position.x,
+            .y = (int) room->player.position.y
+    };
+    Tile *tile = &room->tiles[(int) current_tile.y][(int) current_tile.x];
+    if(tile->type == MANA){
+        room->player.mana += 1;
+        tile->type = EMPTY;
     }
 }

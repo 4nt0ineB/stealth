@@ -25,6 +25,7 @@
 
 #define ROOM_HEIGHT 45
 #define ROOM_WIDTH 60
+#define MANA_TILES_NUMBER 500
 
 #define GUARD_NUMBER 5
 #define GUARD_NEW_DIR_PROBABILITY 0.02
@@ -35,14 +36,7 @@
 #define GUARD_PANIC_VIEW_RANGE 6
 
 
-/**
- * Global of the size of a Tile
- * determined by the View
- * with the window dimensions.
- * See view_update_size().
- * Declared in Setting.c
- * */
-extern int SIDE;
+
 
 /*********************
  * GUI configuration *

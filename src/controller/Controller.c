@@ -12,14 +12,18 @@ int slealth_controller(Room *room) {
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
     view_init();
+    int i;
     while (run) {
         /* Display the current frame, sample function */
         view_update_time();
+        room_check_player(room);
         room_check_guard_panic(room);
         view_draw_info(room);
         view_draw_util();
         view_draw_room(room);
-        /*draw_intersections_with_tiles(room, &room->player.position, &room->guards[0].position);*/
+        for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
+            draw_intersections_with_tiles(room, &room->player.position, &room->guards[i].position);
+        }
         MLV_update_window();
         /* get keyboard events */
         MLV_get_event(&touche, NULL, NULL, NULL,
