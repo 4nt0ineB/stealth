@@ -11,6 +11,7 @@
 #include "Tile.h"
 #include "Character.h"
 #include "Guard.h"
+#include "Relic.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -22,6 +23,7 @@ typedef struct {
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
     Character player;
     Guard guards[GUARD_NUMBER];
+    Relic relics[RELICS_NUMBER];
 } Room;
 
 void room_init(Room *room);

@@ -64,6 +64,27 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
     }
 }
 
+
+/**
+* Places RELICS_NUMBER of relics in the room randomly not at spawn and not in a wall
+* @param room
+*
+*/
+static void room_generate_relics(Room *room){
+    int i, posX, posY;
+    Position pos;
+    for (i = 0; i < RELICS_NUMBER; i++){
+        do {
+            posX = int_rand(1, ROOM_WIDTH - 1);
+            posY = int_rand(1, ROOM_HEIGHT - 1);
+        
+        }while((posX < 3 && posY < 3) || room->tiles[posX][posY].type == WALL || room->tiles[posX][posY].type == RELIC);
+        room->tiles[posX][posY].type = RELIC;
+        position_init(&pos, posX, posY);
+        init_relic(&room->relics[i], pos);
+    }
+}
+
 /**
  * Get a random tile index of a given type
  * @param room
@@ -107,6 +128,8 @@ void room_init(Room *room){
         room_random_position(room, EMPTY, &x, &y);
         room->tiles[y][x].type = MANA;
     }
+    /* Relics */
+    room_generate_relics(room);
 }
 
 void room_print(Room room){
@@ -246,8 +269,17 @@ static void room_make_guards_panick(Room *room){
     }
 }
 
+static int room_guard_sees_missing_relic(const Room *room, const Guard guard, const Relic relic){
+    if(!relic.taken && position_dist(&guard.position, &relic.position)
+           < guard_view_range(&guard)
+        && !room_tile_between(room, &guard.position, &relic.position, WALL)){
+            return 1;
+        }
+    return 0;
+}
+
 void room_check_guard_panic(Room *room){
-    int i;
+    int i, j , relic_missing = 0;
     for(i = 0; i < GUARD_NUMBER; i++){
         if (room->guards[i].panic_mode){
             guard_update_panick_count(&room->guards[i]);
@@ -257,17 +289,23 @@ void room_check_guard_panic(Room *room){
         && !room_tile_between(room, &room->guards[i].position, &room->player.position, WALL)){
             guard_panick(&room->guards[i]);
         } 
+        for (j = 0; j < RELICS_NUMBER; j++){
+            if (room_guard_sees_missing_relic(room, room->guards[i], room->relics[j]))
+                relic_missing = 1;
+        }
         /*
         if (this guard sees relic has disapeared)
             -> make a variable go to 1 
             avoiding if multiple guards sees a relic missing at the same 
-            time to do a loop over all guards every time
+            time to do a loop over all guards multiple time
         */
     }
     /*
     if (variable)
         -> room_make_guards_panick(room);
     */
+    if (relic_missing)
+        room_make_guards_panick(room);
 }
 
 void room_check_player(Room *room){

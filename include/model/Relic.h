@@ -8,8 +8,16 @@
 #ifndef STEALTH_RELIC_H
 #define STEALTH_RELIC_H
 
+#include "core/geometry/Position.h"
+#include "assert.h"
 /* Module that implements the relics of the game and all their functionalities */
 
 
+typedef struct {
+    Position position; /* Pos of the relic int the room */
+    int taken; /* Says if the relic is still on the room or not */
+} Relic;
+
+void init_relic(Relic *relic, Position pos);
 
 #endif /* STEALTH_RELIC_H */

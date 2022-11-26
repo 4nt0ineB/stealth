@@ -60,3 +60,4 @@ void guard_update_panick_count(Guard *guard){
         guard->panic_count++;
     }
 }
+
