@@ -125,10 +125,12 @@ void room_print(Room room){
 
 int room_resolve_collision(Room *room, Position *position){
     assert(room && position);
+    /* top left tile */
     Position tl = {
             .x = MAX(0, (int) position->x - 1),
             .y = MAX(0, (int) position->y - 1)
     };
+    /* bottom right tile */
     Position br = {
             .x = MIN(ROOM_WIDTH, (int) position->x + 1),
             .y = MIN(ROOM_HEIGHT, (int) position->y + 1)

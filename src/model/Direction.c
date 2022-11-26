@@ -12,9 +12,3 @@ const double direction_factor[9][2] = {
         {-1, 0},
         {-(SQRT2 / 2), -(SQRT2 / 2)},
 };
-
-Direction new_dir(){
-    return (Direction) rand() % 4;
-}
-
-
