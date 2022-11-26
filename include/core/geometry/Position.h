@@ -32,6 +32,7 @@ void position_init(Position *position, int x, int y);
 
 double position_dist(const Position *a, const Position *b);
 
+int is_same_position(const Position a, const Position b);
 
 void position_sub(const Position *a, const Position *b, Position *result);
 

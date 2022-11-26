@@ -270,7 +270,7 @@ static void room_make_guards_panick(Room *room){
 }
 
 static int room_guard_sees_missing_relic(const Room *room, const Guard guard, const Relic relic){
-    if(!relic.taken && position_dist(&guard.position, &relic.position)
+    if(relic.taken && position_dist(&guard.position, &relic.position)
            < guard_view_range(&guard)
         && !room_tile_between(room, &guard.position, &relic.position, WALL)){
             return 1;
@@ -309,6 +309,7 @@ void room_check_guard_panic(Room *room){
 }
 
 void room_check_player(Room *room){
+    int i;
     Position current_tile = {
             .x = (int) room->player.position.x,
             .y = (int) room->player.position.y
@@ -318,4 +319,17 @@ void room_check_player(Room *room){
         room->player.mana += 1;
         tile->type = EMPTY;
     }
+    /* Look if he is on relic tile and the relic isn't taken so he takes it*/
+    if (room->tiles[(int) current_tile.y][(int) current_tile.x].type == RELIC){
+        /* Player is on a relic Tile */
+        /* Lets look wich one */
+        for (i = 0; i < RELICS_NUMBER; i++){
+            /* No need to calculate pos if the relic is taken even if not the right one*/
+            if (!room->relics[i].taken && is_same_position(current_tile, room->relics[i].position)){
+                /* It's this relic and relic not taken */
+                take_relic(&room->relics[i]);
+            }
+        }
+    }
 }
+

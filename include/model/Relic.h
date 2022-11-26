@@ -20,4 +20,7 @@ typedef struct {
 
 void init_relic(Relic *relic, Position pos);
 
+void take_relic(Relic *relic);
+
+
 #endif /* STEALTH_RELIC_H */

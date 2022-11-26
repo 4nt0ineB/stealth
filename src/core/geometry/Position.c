@@ -44,3 +44,7 @@ void position_interpolate_with_x(const Position *a, const Position *b, Position 
 void position_interpolate_with_y(const Position *a, const Position *b, Position *to_find){
     to_find->y = a->y + ((b->y - a->y) / (b->x - a->x)) * (to_find->x - a->x);
 }
+
+int is_same_position(const Position a, const Position b){
+    return (a.x == b.x && a.y == b.y);
+}
