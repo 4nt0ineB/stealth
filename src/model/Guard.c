@@ -45,19 +45,19 @@ void guard_unpanick(Guard *guard){
     guard->panic_mode = 0;
 }
 
-void guard_reset_panick_count(Guard *guard){
+void guard_reset_panic_count(Guard *guard){
     assert(guard);
     guard->panic_count = 0;
 }
 
-void guard_update_panick_count(Guard *guard){
+void guard_update_panic_count(Guard *guard){
     assert(guard);
     if (guard->panic_mode){
         if (guard->panic_count >= GUARD_PANIC_DURATION){
-            guard_reset_panick_count(guard);
+            guard_reset_panic_count(guard);
             guard_unpanick(guard);
         }
-        guard->panic_count++;
+        guard->panic_count+=1;
     }
 }
 

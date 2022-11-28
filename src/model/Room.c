@@ -71,16 +71,17 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
 *
 */
 static void room_generate_relics(Room *room){
-    int i, posX, posY;
+    int i, posx, posy;
     Position pos;
     for (i = 0; i < RELICS_NUMBER; i++){
         do {
-            posX = int_rand(1, ROOM_WIDTH - 1);
-            posY = int_rand(1, ROOM_HEIGHT - 1);
+            posx = int_rand(1, ROOM_WIDTH - 1);
+            posy = int_rand(1, ROOM_HEIGHT - 1);
         
-        }while((posX < 3 && posY < 3) || room->tiles[posX][posY].type == WALL || room->tiles[posX][posY].type == RELIC);
-        room->tiles[posX][posY].type = RELIC;
-        position_init(&pos, posX, posY);
+        }while((posx < 3 && posy < 3) || room->tiles[posy][posx].type != EMPTY);
+
+        room->tiles[posy][posx].type = RELIC;
+        position_init(&pos, posx, posy);
         init_relic(&room->relics[i], pos);
     }
 }
@@ -216,7 +217,7 @@ void room_move_guards(Room *room){
                     , room->guards[i].speed
                     , guard_update_direction(&room->guards[i]));
         if(room_resolve_collision(room, &room->guards[i].position)){ /* collided */
-            /* The guard is hitting the wall, so the speed and the direction must be updated */
+            /* The guard is hitting the wall, so the speed and the direction must be updated again */
             guard_update_speed(&room->guards[i]);
             guard_update_direction(&room->guards[i]);
         }
@@ -259,53 +260,63 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
 }
 
 /* Not in the API ? i guess not cause useless outside other functions ?*/
-static void room_make_guards_panick(Room *room){
+static void room_make_guards_panic(Room *room){
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
         if (room->guards[i].panic_mode){
-            /* Then his panick count is reseted */
-            guard_reset_panick_count(&room->guards[i]);
+            /* Then his panic count is reset */
+            guard_reset_panic_count(&room->guards[i]);
         } else guard_panick(&room->guards[i]);
     }
 }
 
+/**
+ *
+ * @param room
+ * @param guard
+ * @param relic
+ * @return
+ */
 static int room_guard_sees_missing_relic(const Room *room, const Guard guard, const Relic relic){
     if(relic.taken && position_dist(&guard.position, &relic.position)
            < guard_view_range(&guard)
-        && !room_tile_between(room, &guard.position, &relic.position, WALL)){
+        && !room_tile_between(room, &guard.position, &relic.position, WALL)
+        && !relic.noticed /* can't panic for seeing a stolen relic twice*/
+        ){
             return 1;
         }
     return 0;
 }
 
 void room_check_guard_panic(Room *room){
-    int i, j , relic_missing = 0;
-    for(i = 0; i < GUARD_NUMBER; i++){
-        if (room->guards[i].panic_mode){
-            guard_update_panick_count(&room->guards[i]);
+    int i, j;
+    /* update all panic counters */
+    for(i = 0; i < GUARD_NUMBER; i++) {
+        guard_update_panic_count(&room->guards[i]);
+
+        for (j = 0; j < RELICS_NUMBER; j++) {
+            if (room_guard_sees_missing_relic(room, room->guards[i], room->relics[j])) {
+                /* the missing relic has been noticed by all guards now */
+                room->relics[j].noticed = 1;
+                /* every guard goes panicking */
+                room_make_guards_panic(room);
+                return;
+            }
         }
+    }
+}
+
+int room_check_guards_find_player(Room *room){
+    int i, j;
+    for(i = 0; i < GUARD_NUMBER; i++){
         if(position_dist(&room->guards[i].position, &room->player.position)
            < guard_view_range(&room->guards[i])
-        && !room_tile_between(room, &room->guards[i].position, &room->player.position, WALL)){
-            guard_panick(&room->guards[i]);
-        } 
-        for (j = 0; j < RELICS_NUMBER; j++){
-            if (room_guard_sees_missing_relic(room, room->guards[i], room->relics[j]))
-                relic_missing = 1;
+           && !room_tile_between(room, &room->guards[i].position,
+                                 &room->player.position, WALL)){
+            return 1;
         }
-        /*
-        if (this guard sees relic has disapeared)
-            -> make a variable go to 1 
-            avoiding if multiple guards sees a relic missing at the same 
-            time to do a loop over all guards multiple time
-        */
     }
-    /*
-    if (variable)
-        -> room_make_guards_panick(room);
-    */
-    if (relic_missing)
-        room_make_guards_panick(room);
+    return 0;
 }
 
 void room_check_player(Room *room){
@@ -315,17 +326,20 @@ void room_check_player(Room *room){
             .y = (int) room->player.position.y
     };
     Tile *tile = &room->tiles[(int) current_tile.y][(int) current_tile.x];
+
+    /* Take the mana on the tile if exists */
     if(tile->type == MANA){
         room->player.mana += 1;
         tile->type = EMPTY;
     }
-    /* Look if he is on relic tile and the relic isn't taken so he takes it*/
-    if (room->tiles[(int) current_tile.y][(int) current_tile.x].type == RELIC){
+    /* Look if he is on a relic tile and the relic isn't taken so he takes it*/
+    if (tile->type == RELIC){
         /* Player is on a relic Tile */
         /* Lets look wich one */
         for (i = 0; i < RELICS_NUMBER; i++){
-            /* No need to calculate pos if the relic is taken even if not the right one*/
-            if (!room->relics[i].taken && is_same_position(current_tile, room->relics[i].position)){
+            /* No need to calculate pos if the relic is taken even if not the right one */
+            if (!room->relics[i].taken
+            && is_same_position(&current_tile, &room->relics[i].position)){
                 /* It's this relic and relic not taken */
                 take_relic(&room->relics[i]);
             }

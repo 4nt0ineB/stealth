@@ -182,6 +182,22 @@ void view_draw_player(const Character *character){
     MLV_draw_filled_circle(pos.x, pos.y, SIDE / 2, MLV_COLOR_RED);
 }
 
+void view_draw_relic(const Relic *relic){
+    Rectangle tile;
+    Position pos;
+    MLV_Color color = relic->taken ? MLV_rgba(0, 0, 0, 0) : MLV_COLOR_SALMON;
+    view_get_absolute_position(&relic->position, &pos);
+    MLV_draw_filled_rectangle(pos.x, pos.y, SIDE, SIDE, color);
+    MLV_draw_rectangle(
+            pos.x
+            , pos.y
+            , SIDE
+            , SIDE
+            , MLV_rgba(224, 224, 0, 255)
+    );
+
+}
+
 void view_draw_guard(const Guard *guard){
     Position pos;
     MLV_Color color;
@@ -204,45 +220,55 @@ void view_draw_guard(const Guard *guard){
 void view_draw_room(const Room *room){
     /*
      * The absolute position of any object of the room to be drawn
-     * is determined here !
+     * is determined in the view !
      */
+    Position pos;
+
     int i, j;
     /* The Background */
     draw_rectangle(&View.game_area, MLV_COLOR_DARK_GREY);
 
     /* The Grid */
-    /* Draw lines */
-    int ox = View.game_area.origin.x;
-    int oy = View.game_area.origin.y;
-    int thickness = 1;
+    char thickness = 1;
+    /* Draw the lines */
     for(i = 0; i < ROOM_HEIGHT; i++){
+        pos.x = 0;
+        pos.y = i;
+        view_get_absolute_position(&pos, &pos);
         MLV_draw_filled_rectangle(
-                ox
-                , oy + i * SIDE
+                pos.x
+                , pos.y
                 , View.game_area.w
                 , thickness
                 , MLV_COLOR_BLACK);
     }
-    /* Draw columns */
+    /* Draw the columns */
     for(j = 0; j < ROOM_WIDTH; j++){
+        pos.x = j;
+        pos.y = 0;
+        view_get_absolute_position(&pos, &pos);
         MLV_draw_filled_rectangle(
-                ox + j * SIDE
-                , oy
+                pos.x
+                , pos.y
                 , thickness
                 , View.game_area.h
                 , MLV_COLOR_BLACK);
     }
 
+    /* Draw the tiles : to delegate */
     for(i = 0; i < ROOM_HEIGHT; i++){
         for(j = 0; j < ROOM_WIDTH; j++){
+            pos.x = j;
+            pos.y = i;
+            view_get_absolute_position(&pos, &pos);
             /*
              * @Todo delegate
              * */
             switch (room->tiles[i][j].type) {
                 case WALL:
                     MLV_draw_filled_rectangle(
-                            ox + j * SIDE
-                            , oy + i * SIDE
+                            pos.x
+                            , pos.y
                             , SIDE
                             , SIDE
                             , MLV_COLOR_BLACK
@@ -250,14 +276,15 @@ void view_draw_room(const Room *room){
                     break;
                 case MANA:
                     MLV_draw_filled_rectangle(
-                            ox + j * SIDE
-                            , oy + i * SIDE
+                            pos.x
+                            , pos.y
                             , SIDE
                             , SIDE
                             , MLV_rgba(0, 162, 184,120)
                     );
                     break;
                 case EMPTY:
+                    break;
                 case RELIC:
                     break;
             }
@@ -270,8 +297,12 @@ void view_draw_room(const Room *room){
     /* Guards */
     for(i = 0; i < GUARD_NUMBER; i++){
         view_draw_guard(&room->guards[i]);
-
     }
+
+    for(i = 0; i < RELICS_NUMBER; i++){
+        view_draw_relic(&room->relics[i]);
+    }
+
 }
 
 void view_free(){
@@ -343,6 +374,4 @@ void draw_intersections_with_tiles(const Room *room, const Position *p1, const P
             MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_ORANGE);
         }
     }
-
-
 }

@@ -69,6 +69,12 @@ void draw_rectangle(const Rectangle *rectangle, MLV_Color color);
  */
 void view_update_time();
 
+/**
+ * Just for fun and debugging
+ * @param room
+ * @param p1
+ * @param p2
+ */
 void draw_intersections_with_tiles(const Room *room, const Position *p1, const Position *p2);
 
 #endif /* STEALTH_VIEW_H */

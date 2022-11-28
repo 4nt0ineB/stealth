@@ -9,21 +9,25 @@ static Direction get_direction_from_keyboard();
 
 int slealth_controller(Room *room) {
     int run = 1;
+    int detection_overview = 0;
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
+
     view_init();
     int i;
     while (run) {
         /* Display the current frame, sample function */
         view_update_time();
         room_check_player(room);
+        room_check_guards_find_player(room);
         room_check_guard_panic(room);
         view_draw_info(room);
         view_draw_util();
         view_draw_room(room);
-        for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
-            draw_intersections_with_tiles(room, &room->player.position, &room->guards[i].position);
-        }
+        if(detection_overview)
+            for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
+                draw_intersections_with_tiles(room, &room->player.position, &room->guards[i].position);
+            }
         MLV_update_window();
         /* get keyboard events */
         MLV_get_event(&touche, NULL, NULL, NULL,
@@ -31,6 +35,7 @@ int slealth_controller(Room *room) {
         /* quit with x */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_x))
             break;
+        if (!MLV_get_keyboard_state(MLV_KEYBOARD_o)) detection_overview = !detection_overview;
         room_move_player(room, get_direction_from_keyboard());
         room_move_guards(room);
 

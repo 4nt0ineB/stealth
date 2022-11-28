@@ -64,8 +64,18 @@ void room_move_guards(Room *room);
  */
 int room_tile_between(const Room *room, const Position *p1, const Position *p2, TileType tile_type);
 
-
+/**
+ * Put guards in panic mode
+ * @param room
+ */
 void room_check_guard_panic(Room *room);
+
+/**
+ * Check if any guards detected the player
+ * @param room
+ * @return 1 if caught, otherwise 0
+ */
+int room_check_guards_find_player(Room *room);
 
 void room_check_player(Room *room);
 
