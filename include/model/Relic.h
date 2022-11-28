@@ -17,7 +17,7 @@
 
 typedef struct {
     Position position; /*<! Pos of the relic int the room */
-    int taken; /*<! Says if the relic is still on the room or not */
+    int stolen; /*<! Says if the relic is still on the room or not */
     int noticed; /*<! Has */
 } Relic;
 

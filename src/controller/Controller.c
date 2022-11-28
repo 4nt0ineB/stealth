@@ -12,21 +12,21 @@ int slealth_controller(Room *room) {
     int detection_overview = 0;
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
-
-    view_init();
+    View view;
+    view_init(&view);
     int i;
     while (run) {
         /* Display the current frame, sample function */
-        view_update_time();
+        view_update_time(&view);
         room_check_player(room);
         room_check_guards_find_player(room);
         room_check_guard_panic(room);
-        view_draw_info(room);
-        view_draw_util();
-        view_draw_room(room);
+        view_draw_info(&view, room);
+        view_draw_util(&view);
+        view_draw_room(&view, room);
         if(detection_overview)
             for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
-                draw_intersections_with_tiles(room, &room->player.position, &room->guards[i].position);
+                draw_intersections_with_tiles(&view, room, &room->player.position, &room->guards[i].position);
             }
         MLV_update_window();
         /* get keyboard events */
@@ -35,13 +35,20 @@ int slealth_controller(Room *room) {
         /* quit with x */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_x))
             break;
-        if (!MLV_get_keyboard_state(MLV_KEYBOARD_o)) detection_overview = !detection_overview;
+        if (!MLV_get_keyboard_state(MLV_KEYBOARD_o))
+            detection_overview = !detection_overview;
+        if(!MLV_get_keyboard_state(MLV_KEYBOARD_RSHIFT)
+            || !MLV_get_keyboard_state(MLV_KEYBOARD_LSHIFT)){
+            player_activate_skill(&room->player, SPEED);
+        }
+        room_add_mana(room, player_consume_mana(&room->player));
+        player_update_skills_state(&room->player);
         room_move_player(room, get_direction_from_keyboard());
         room_move_guards(room);
 
         MLV_delay_according_to_frame_rate();
     }
-    view_free();
+    view_free(&view);
     return 0;
 }
 

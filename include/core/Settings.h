@@ -39,8 +39,9 @@
 #define GUARD_PANIC_TIME 30 /*30 seconds*/
 #define GUARD_PANIC_DURATION (FPS * GUARD_PANIC_TIME)
 
-
-
+/* Skills */
+#define SKILL_NUMBER 2
+#define SKILL_MAX_SPEED 9
 
 /*********************
  * GUI configuration *

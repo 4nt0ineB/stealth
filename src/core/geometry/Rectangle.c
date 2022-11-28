@@ -17,6 +17,12 @@ void rectangle_print(Rectangle *rectangle){
            , rectangle->h);
 }
 
+void rectangle_init(Rectangle  *rectangle, int x, int y, int w, int h){
+    position_init(&rectangle->origin, x, y);
+    rectangle->w = w;
+    rectangle->h = h;
+}
+
 void rectangle_with_padding(const Rectangle *rectangle, double paddingx, double paddingy, Rectangle *result){
     paddingx = rectangle->w * paddingx;
     paddingy = rectangle->h * paddingy;

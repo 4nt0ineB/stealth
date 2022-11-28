@@ -29,5 +29,8 @@ typedef enum {
  */
 extern const double direction_factor[9][2];
 
+Direction direction_previous(Direction direction);
+
+Direction direction_next(Direction direction);
 
 #endif

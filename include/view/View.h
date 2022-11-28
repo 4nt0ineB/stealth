@@ -19,24 +19,55 @@
 
 #include "core/geometry/Rectangle.h"
 #include "model/Room.h"
+#include "core/Timer.h"
 #include <MLV/MLV_all.h>
+
+/**
+ * There is only one possible running window with MLV so why not use a global
+ */
+typedef struct {
+    int side;
+    /**
+     * @brief Zone d'information définit manuellement sous forme
+     *  de pourcentage comme en css. Ex x, y et 15 (80% de la largeur) 25 (25% de la hauteur);
+     *  (centré à par rapport à window )
+     *
+     */
+    Rectangle info_area;
+    /**
+     * @brief zone restante à calculer dynamiquement
+     * après définition de la zone d'information
+     *
+     */
+    Rectangle available_area;
+    /**
+     * @brief zone de jeu à calculer dynamiquement d'après la zone
+     * disponible et en fonction des constantes du nombre de tuiles par côté.
+     * (centré à par rapport à available_area )
+     */
+    Rectangle game_area;
+    MLV_Color bg_color;
+    MLV_Font *font;
+    Timer *timer;
+
+} View;
 
 /**
  * Init the window and the view for the given dimensions
  */
-void view_init();
+void view_init(View *view);
 
 /**
  * Some printing when dev
  */
-void view_draw_util();
+void view_draw_util(View *view);
 
 /**
  * @brief Draw the room
  * @param w
  * @param h
  */
-void view_draw_room(const Room *room);
+void view_draw_room(View *view, const Room *room);
 
 /**
  * Resize the window
@@ -44,30 +75,30 @@ void view_draw_room(const Room *room);
  * @param w
  * @param h
  */
-void view_update_size(int w, int h);
+void view_update_size(View *view, int w, int h);
 
 /**
  * Draw the info area
  */
-void view_draw_info(const Room *room);
+void view_draw_info(View *view, const Room *room);
 
 /**
  * close the view
  * and free its allocated properties
  */
-void view_free();
+void view_free(View *view);
 
 /**
  * Draw a rectangle on the window
  * @param rectangle
  * @param color
  */
-void draw_rectangle(const Rectangle *rectangle, MLV_Color color);
+void draw_rectangle(View *view, const Rectangle *rectangle, MLV_Color color);
 
 /**
  * Update the elapsed time
  */
-void view_update_time();
+void view_update_time(View *view);
 
 /**
  * Just for fun and debugging
@@ -75,6 +106,6 @@ void view_update_time();
  * @param p1
  * @param p2
  */
-void draw_intersections_with_tiles(const Room *room, const Position *p1, const Position *p2);
+void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2);
 
 #endif /* STEALTH_VIEW_H */

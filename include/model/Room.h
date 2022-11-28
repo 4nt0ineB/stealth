@@ -9,7 +9,7 @@
 #define STEALTH_ROOM_H
 #include "core/Settings.h"
 #include "Tile.h"
-#include "Character.h"
+#include "Player.h"
 #include "Guard.h"
 #include "Relic.h"
 #include <stdio.h>
@@ -21,7 +21,7 @@
 
 typedef struct {
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
-    Character player;
+    Player player;
     Guard guards[GUARD_NUMBER];
     Relic relics[RELICS_NUMBER];
 } Room;
@@ -77,6 +77,26 @@ void room_check_guard_panic(Room *room);
  */
 int room_check_guards_find_player(Room *room);
 
+/**
+ * Get the mana or the relics if the player
+ * is on one of these tiles
+ * @param room
+ */
 void room_check_player(Room *room);
+
+/**
+ * Set a given amount of mana tiles
+ * in the room
+ * @param room
+ * @param amount
+ */
+void room_add_mana(Room *room, int amount);
+
+/**
+ * Return the number of stolen relics
+ * @param room
+ * @return
+ */
+int room_stolen_relic_count(const Room *room);
 
 #endif /* STEALTH_ROOM_H */

@@ -9,14 +9,14 @@ include_directories(include/graphics)
 
 add_executable(stealth
         include/controller/Controller.h
-        include/model/Character.h
+        include/model/Player.h
         include/model/Guard.h
         include/view/Menu.h
         include/model/Relic.h
         include/model/Room.h
         include/Test.h
         src/controller/Controller.c
-        src/model/Character.c
+        src/model/Player.c
         src/model/Guard.c
         src/Main.c
         src/view/Menu.c
@@ -37,7 +37,7 @@ add_executable(stealth
         src/core/Util.c
         include/core/Util.h src/core/Settings.c
         src/core/Timer.c
-        include/core/Timer.h)
+        include/core/Timer.h src/model/Skill.c include/model/Skill.h)
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros

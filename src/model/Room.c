@@ -104,7 +104,7 @@ static int room_random_position(Room *room, TileType tile_type, int *res_x, int 
 void room_init(Room *room){
     int i, j, x, y;
 
-    /* Puting outside Walls all over the rectangle sides */
+    /* Puting outview->side Walls all over the rectangle view->sides */
     for (i = 0; i < ROOM_HEIGHT; i++){
         for (j = 0; j < ROOM_WIDTH; j++){
             if (i == 0 || j == 0 || j == ROOM_WIDTH - 1 || i == ROOM_HEIGHT - 1)
@@ -114,21 +114,18 @@ void room_init(Room *room){
         }
     }
 
-    /* Generate inside walls*/
+    /* Generate inview->side walls*/
     generate_room(room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
 
     /* player */
-    character_init(&(room->player), 2, 2);
+    player_init(&(room->player), 2, 2);
     /* guards */
     for(i = 0; i < GUARD_NUMBER; i++){
         room_random_position(room, EMPTY, &x, &y);
         guard_init(&(room->guards[i]) , x, y);
     }
     /* mana */
-    for(i = 0; i < MANA_TILES_NUMBER; i++){
-        room_random_position(room, EMPTY, &x, &y);
-        room->tiles[y][x].type = MANA;
-    }
+    room_add_mana(room, MANA_TILES_NUMBER);
     /* Relics */
     room_generate_relics(room);
 }
@@ -200,11 +197,11 @@ static void entity_move(Position *position, double speed, Direction direction){
 
 void room_move_player(Room *room, Direction direction){
     assert(room);
-    character_update_speed(&room->player, direction);
+    player_update_speed(&room->player, direction);
     entity_move(&room->player.position, room->player.speed, direction);
     if(room_resolve_collision(room, &room->player.position)){  /* collided */
         /* The player is hitting the wall, so the speed must be reset to init speed */
-        character_update_speed(&room->player, STILL);
+        player_update_speed(&room->player, STILL);
     }
 }
 
@@ -259,7 +256,7 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
     return 0;
 }
 
-/* Not in the API ? i guess not cause useless outside other functions ?*/
+/* Not in the API ? i guess not cause useless outview->side other functions ?*/
 static void room_make_guards_panic(Room *room){
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
@@ -278,10 +275,10 @@ static void room_make_guards_panic(Room *room){
  * @return
  */
 static int room_guard_sees_missing_relic(const Room *room, const Guard guard, const Relic relic){
-    if(relic.taken && position_dist(&guard.position, &relic.position)
-           < guard_view_range(&guard)
-        && !room_tile_between(room, &guard.position, &relic.position, WALL)
-        && !relic.noticed /* can't panic for seeing a stolen relic twice*/
+    if(relic.stolen && position_dist(&guard.position, &relic.position)
+                       < guard_view_range(&guard)
+       && !room_tile_between(room, &guard.position, &relic.position, WALL)
+       && !relic.noticed /* can't panic for seeing a stolen relic twice*/
         ){
             return 1;
         }
@@ -307,7 +304,7 @@ void room_check_guard_panic(Room *room){
 }
 
 int room_check_guards_find_player(Room *room){
-    int i, j;
+    int i;
     for(i = 0; i < GUARD_NUMBER; i++){
         if(position_dist(&room->guards[i].position, &room->player.position)
            < guard_view_range(&room->guards[i])
@@ -338,7 +335,7 @@ void room_check_player(Room *room){
         /* Lets look wich one */
         for (i = 0; i < RELICS_NUMBER; i++){
             /* No need to calculate pos if the relic is taken even if not the right one */
-            if (!room->relics[i].taken
+            if (!room->relics[i].stolen
             && is_same_position(&current_tile, &room->relics[i].position)){
                 /* It's this relic and relic not taken */
                 take_relic(&room->relics[i]);
@@ -347,3 +344,18 @@ void room_check_player(Room *room){
     }
 }
 
+void room_add_mana(Room *room, int amount){
+    int y, x;
+    int i;
+    for(i = 0; i < amount; i++){
+        room_random_position(room, EMPTY, &x, &y);
+        room->tiles[y][x].type = MANA;
+    }
+}
+
+int room_stolen_relic_count(const Room *room){
+    int i, count;
+    for(i = count = 0; i < RELICS_NUMBER; i++)
+        if(room->relics[i].stolen) count++;
+    return count;
+}
