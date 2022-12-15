@@ -71,7 +71,6 @@ static void controller_update_view(GameData *data, View *view){
     view_draw_relics(view, data->relics);
     view_draw_guards(view, data->guards);
     view_draw_player(view, &data->player);
-
 }
 
 void controller_init_relics(GameData *data){

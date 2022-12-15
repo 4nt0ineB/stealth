@@ -23,6 +23,13 @@
 #include "Controller.h"
 #include <MLV/MLV_all.h>
 
+typedef enum {
+    IMAGE_WALL,
+    IMAGE_EMPTY,
+    IMAGE_RELIC
+
+} ImageType ;
+
 /**
  * There is only one possible running window with MLV so why not use a global
  */
@@ -50,7 +57,7 @@ typedef struct {
     MLV_Color bg_color;
     MLV_Font *font;
     Timer *timer;
-
+    MLV_Image *images[IMAGE_RELIC + 1];
 } View;
 
 /**

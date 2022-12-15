@@ -14,6 +14,13 @@
 #include <assert.h>
 #include <math.h>
 
+static void view_init_images(View *view){
+    MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
+    view->images[IMAGE_WALL] = MLV_copy_partial_image(tmp, 256, 32, 8, 8);
+    view->images[IMAGE_EMPTY] = MLV_copy_partial_image(tmp, 110, 240, 9, 9);
+    view->images[IMAGE_RELIC] = MLV_copy_partial_image(tmp, 143, 160, 9, 9);
+    MLV_free_image(tmp);
+}
 
 void view_init(View *view){
     rectangle_init(&view->info_area, 0, 0, 0, 0);
@@ -31,8 +38,8 @@ void view_init(View *view){
                      (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
     view->timer = new_timer();
     timer_start(view->timer);
+    view_init_images(view);
 }
-
 
 void view_draw_stolen_relics(View *view, int n){
     static char buffer[40] = {0};
@@ -215,7 +222,7 @@ void view_draw_player(View *view, const Player *character){
 
 void view_draw_relic(View *view, const Relic *relic){
     Position pos;
-    MLV_Color color = relic->stolen ? MLV_rgba(0, 0, 0, 0) : MLV_COLOR_GREEN3;
+    MLV_Color color = relic_is_stolen(relic) ? MLV_rgba(0, 0, 0, 0) : MLV_COLOR_GREEN3;
     view_get_absolute_position(view, &relic->position, &pos);
     MLV_draw_filled_rectangle(pos.x, pos.y, view->side, view->side, color);
     MLV_draw_rectangle(
@@ -225,6 +232,10 @@ void view_draw_relic(View *view, const Relic *relic){
             , view->side
             , MLV_rgba(224, 224, 0, 255)
     );
+    if(!relic_is_stolen(relic) && view->images[IMAGE_RELIC]){
+        MLV_resize_image_with_proportions(view->images[IMAGE_RELIC], view->side, view->side);
+        MLV_draw_image(view->images[IMAGE_RELIC], pos.x, pos.y);
+    }
 
 }
 
@@ -312,28 +323,37 @@ void view_draw_room(View *view, const Room *room){
     }
 
     /* Draw the tiles : to delegate */
+    MLV_Image *img_tile;
     for(i = 0; i < ROOM_HEIGHT; i++){
         for(j = 0; j < ROOM_WIDTH; j++){
+            img_tile = NULL;
             pos.x = j;
             pos.y = i;
             view_get_absolute_position(view, &pos, &pos);
             /*
              * @Todo delegate
              * */
-            if(room_get_tile_type(room, i, j) == EMPTY) continue;
+            /*if(room_get_tile_type(room, i, j) == EMPTY) continue;*/
             switch (room_get_tile_type(room, i, j)) {
                 case WALL:
                     color = MLV_COLOR_BLACK;
+                    img_tile = view->images[IMAGE_WALL];
                     break;
                 case MANA:
                     color = MLV_rgba(0, 162, 184,120);
+                    img_tile = view->images[IMAGE_EMPTY];
                     break;
                 case EMPTY:
-                case RELIC:
+                    color = MLV_COLOR_BLACK;
+                    break;
                 default:
                     color = MLV_rgba(0,0,0,0);
             }
             MLV_draw_filled_rectangle(pos.x, pos.y, view->side, view->side, color);
+            if(img_tile){
+                MLV_resize_image_with_proportions(img_tile, view->side, view->side);
+                MLV_draw_image(img_tile, pos.x, pos.y);
+            }
         }
     }
 }
@@ -342,6 +362,10 @@ void view_draw_room(View *view, const Room *room){
 
 void view_free(View *view){
     MLV_free_font(view->font);
+    int i;
+    for(i = 0; i < IMAGE_RELIC + 1; i++){
+        MLV_free_image(view->images[i]);
+    }
     MLV_free_window();
 }
 

@@ -37,3 +37,7 @@ As stated in course.
 ainsi qu’à l’assemblage de l’exécutable (sinon, c’est que votre interface graphique dé-
 gouline de partout et que vos sources sont mal modulées)."
 
+
+### Credits
+
+wall sprites from [Michele Bucelli](https://opengameart.org/users/buch)
