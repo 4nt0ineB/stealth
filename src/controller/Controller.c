@@ -3,7 +3,7 @@
 #include "view/View.h"
 #include "controller/Controller.h"
 #include "core/Timer.h"
-#include <MLV/MLV_all.h>
+
 
 static Direction get_direction_from_keyboard();
 static void controller_update_view(GameData *data, View *view);
@@ -16,10 +16,10 @@ int slealth_controller() {
     GameData data;
     controller_init(&data);
     view_init(&view);
-    if( MLV_init_audio() ){
-        fprintf(stderr,"Could not load audio lib.");
+    if(controller_init_audio(&data)){
         return 1;
     }
+    MLV_play_music(data.music_room, 0.5f, -1);
     int i;
     while (1) {
         /* Display the current frame, sample function */
@@ -60,17 +60,18 @@ int slealth_controller() {
         MLV_delay_according_to_frame_rate();
     }
     view_free(&view);
+    MLV_free_audio();
     return 0;
 }
-
 
 static void controller_update_view(GameData *data, View *view){
     view_draw_info(view, data);
     view_draw_util(view);
     view_draw_room(view, &data->room);
+    view_draw_relics(view, data->relics);
     view_draw_guards(view, data->guards);
     view_draw_player(view, &data->player);
-    view_draw_relics(view, data->relics);
+
 }
 
 void controller_init_relics(GameData *data){
@@ -88,6 +89,18 @@ void controller_init_relics(GameData *data){
         position_init(&pos, posx, posy);
         init_relic(&data->relics[i], pos);
     }
+}
+
+int controller_init_audio(GameData *data){
+    if( MLV_init_audio() ){
+        fprintf(stderr,"Could not load audio lib.");
+        return 1;
+    }
+    data->music_room = MLV_load_music("resources/music/stealth.ogg");
+    data->music_alarm = MLV_load_music("resources/music/alarm.ogg");
+    data->sound_mana = MLV_load_sound("resources/music/mana.ogg");
+    data->sound_relic = MLV_load_sound("resources/music/relic.ogg");
+    return 0;
 }
 
 void controller_init(GameData *data){
@@ -150,7 +163,7 @@ void controller_make_guards_panic(GameData *data){
         if (data->guards[i].panic_mode){
             /* Then his panic count is reset */
             guard_reset_panic_count(&data->guards[i]);
-        } else guard_panick(&data->guards[i]);
+        } else guard_panic(&data->guards[i]);
     }
 }
 
@@ -172,21 +185,33 @@ int controller_guard_sees_missing_relic(const Room *room, const Guard guard, con
     return 0;
 }
 
-void controller_check_guard_panic(GameData *data){
+int controller_check_guard_panic(GameData *data){
     int i, j;
     /* update all panic counters */
+    int panicking = guard_is_panicking(&data->guards[0]);
     for(i = 0; i < GUARD_NUMBER; i++) {
         guard_update_panic_count(&data->guards[i]);
         for (j = 0; j < RELICS_NUMBER; j++) {
             if (controller_guard_sees_missing_relic(&data->room, data->guards[i], data->relics[j])) {
                 /* the missing relic has been noticed by all guards now */
                 data->relics[j].noticed = 1;
+                /* Play alarm sound if not already panicking */
+                if(!guard_is_panicking(&data->guards[i])){
+                    MLV_stop_music();
+                    MLV_play_music(data->music_alarm, 1.5f, -1);
+                }
                 /* every guard goes panicking */
                 controller_make_guards_panic(data);
-                return;
+                return 1;
             }
         }
     }
+    /* No more panicking then restart music */
+    if(panicking != guard_is_panicking(&data->guards[0])){
+        MLV_stop_music();
+        MLV_play_music(data->music_room, 0.5f, -1);
+    }
+    return 0;
 }
 
 void controller_check_player(GameData *data){
@@ -200,6 +225,8 @@ void controller_check_player(GameData *data){
     if(tile->type == MANA){
         data->player.mana += 1;
         tile->type = EMPTY;
+        /* mana sound */
+        MLV_play_sound(data->sound_mana, 0.1f);
     }
     /* Look if he is on a relic tile and the relic isn't taken so he takes it*/
     if (tile->type == RELIC){
@@ -211,6 +238,8 @@ void controller_check_player(GameData *data){
                 && is_same_position(&current_tile, &data->relics[i].position)){
                 /* It's this relic and relic not taken */
                 relic_steal(&data->relics[i]);
+                /* relic steal sound */
+                MLV_play_sound(data->sound_relic, 0.5f);
             }
         }
     }

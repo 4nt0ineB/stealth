@@ -41,6 +41,6 @@ add_executable(stealth
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros
-add_compile_definitions(RESOURCES_DIR="../resources/")
+add_compile_definitions(RESOURCES_DIR="resources/")
 add_compile_definitions(DEFAULT_WIN_W_PERCENT=70)
 add_compile_definitions(DEFAULT_WIN_H_PERCENT=70)

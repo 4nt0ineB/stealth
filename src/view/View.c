@@ -18,7 +18,6 @@
 void view_init(View *view){
     rectangle_init(&view->info_area, 0, 0, 0, 0);
     view->available_area = view->game_area = view->info_area;
-
     view->timer = NULL;
     view->side = 0;
     view->font = NULL;
@@ -117,7 +116,7 @@ void view_draw_mana_bar(View *view, const GameData *data){
 void view_draw_player_skills_info(const View *view, const Player *player){
     static char buffer[100] = {0};
     buffer[0] = '\0';
-    int i, txtw;
+    int txtw;
     if(skill_is_activated(player_skill(player, INVISIBILITY))){
         strcat(buffer, "Invisible");
     }

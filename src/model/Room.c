@@ -81,7 +81,7 @@ int room_random_position(const Room *room, TileType tile_type, int *res_x, int *
 }
 
 void room_init(Room *room){
-    int i, j, x, y;
+    int i, j;
     /* Putting outview->side Walls all over the rectangle view->sides */
     for (i = 0; i < ROOM_HEIGHT; i++){
         for (j = 0; j < ROOM_WIDTH; j++){

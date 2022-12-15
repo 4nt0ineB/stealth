@@ -35,12 +35,12 @@ double guard_view_range(const Guard *guard){
     return GUARD_VIEW_RANGE;
 }
 
-void guard_panick(Guard *guard){
+void guard_panic(Guard *guard){
     assert(guard);
     guard->panic_mode = 1;
 }
 
-void guard_unpanick(Guard *guard){
+void guard_unpanic(Guard *guard){
     assert(guard);
     guard->panic_mode = 0;
 }
@@ -55,7 +55,7 @@ void guard_update_panic_count(Guard *guard){
     if (guard->panic_mode){
         if (guard->panic_count >= GUARD_PANIC_DURATION){
             guard_reset_panic_count(guard);
-            guard_unpanick(guard);
+            guard_unpanic(guard);
         }
         guard->panic_count+=1;
     }

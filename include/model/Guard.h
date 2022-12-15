@@ -40,13 +40,13 @@ void guard_init(Guard *guard, int x, int y);
  * Make the guard go into panick mode
  * @param guard
  */
-void guard_panick(Guard *guard);
+void guard_panic(Guard *guard);
 
 /**
  * Make the guard drop his panick mode
  * @param guard
  */
-void guard_unpanick(Guard *guard);
+void guard_unpanic(Guard *guard);
 
 Direction guard_update_direction(Guard *guard);
 
