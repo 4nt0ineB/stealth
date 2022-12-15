@@ -423,7 +423,7 @@ void draw_intersections_with_tiles(View *view, const Room *room, const Position 
             tmp.x = (int) pos_a.x;
             tmp.y = (int) pos_a.y;
             /* enhance if wall */
-            if(room_get_tile_type(room, tmp.x, tmp.y) == WALL) {
+            if(room_get_tile_type(room, tmp.y, tmp.x) == WALL) {
                 view_get_absolute_position(view, &tmp, &tmp);
                 MLV_draw_filled_rectangle(
                         tmp.x,
