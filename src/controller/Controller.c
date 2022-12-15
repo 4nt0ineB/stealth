@@ -16,6 +16,10 @@ int slealth_controller() {
     GameData data;
     controller_init(&data);
     view_init(&view);
+    if( MLV_init_audio() ){
+        fprintf(stderr,"Could not load audio lib.");
+        return 1;
+    }
     int i;
     while (1) {
         /* Display the current frame, sample function */
@@ -206,7 +210,7 @@ void controller_check_player(GameData *data){
             if (!data->relics[i].stolen
                 && is_same_position(&current_tile, &data->relics[i].position)){
                 /* It's this relic and relic not taken */
-                take_relic(&data->relics[i]);
+                relic_steal(&data->relics[i]);
             }
         }
     }
@@ -228,12 +232,9 @@ int controller_check_guards_find_player(GameData *data){
 int controller_stolen_relic_count(const GameData *data){
     int i, count;
     for(i = count = 0; i < RELICS_NUMBER; i++)
-        if(data->relics[i].stolen) count++;
+        if(relic_is_stolen(&data->relics[i])) count++;
     return count;
 }
-
-
-
 
 static Direction get_direction_from_keyboard() {
     static Direction direction;

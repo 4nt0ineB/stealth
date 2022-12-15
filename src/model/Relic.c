@@ -7,7 +7,12 @@ void init_relic(Relic *relic, Position pos){
     relic->position = pos;
 }
 
-void take_relic(Relic *relic){
+void relic_steal(Relic *relic){
     assert(relic);
     relic->stolen = 1;
+}
+
+int relic_is_stolen(const Relic *relic){
+    assert(relic);
+    return relic->stolen;
 }

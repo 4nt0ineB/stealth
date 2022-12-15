@@ -23,7 +23,8 @@ typedef struct {
 
 void init_relic(Relic *relic, Position pos);
 
-void take_relic(Relic *relic);
+void relic_steal(Relic *relic);
 
+int relic_is_stolen(const Relic *relic);
 
 #endif /* STEALTH_RELIC_H */
