@@ -58,5 +58,6 @@ void guard_reset_panic_count(Guard *guard);
 
 void guard_update_panic_count(Guard *guard);
 
+int guard_is_panicking(const Guard *guard);
 
 #endif /* STEALTH_GUARD_H */

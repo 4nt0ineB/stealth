@@ -55,4 +55,9 @@ void player_activate_skill(Player *player, SkillType type);
  */
 int player_consume_mana(Player *player);
 
+
+Skill * player_skill(const Player *player, SkillType type);
+
+void player_deactivate_all_skills(Player *player);
+
 #endif /* STEALTH_PLAYER_H */

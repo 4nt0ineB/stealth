@@ -61,3 +61,7 @@ void guard_update_panic_count(Guard *guard){
     }
 }
 
+
+int guard_is_panicking(const Guard *guard){
+    return guard->panic_mode;
+}

@@ -32,7 +32,7 @@ void player_update_speed(Player *player, Direction direction){
      * character has abilities that permits
      * to go over the normal maximum speed
      * */
-    double max_speed = player->skills[SPEED].activated ? SKILL_MAX_SPEED : PLAYER_MAX_SPEED;
+    double max_speed = skill_is_activated(&player->skills[SPEED]) ? SKILL_MAX_SPEED : PLAYER_MAX_SPEED;
     double new_speed = player->speed + PLAYER_INCR_SPEED;
     player->speed = MIN(new_speed, max_speed);
 }
@@ -42,25 +42,38 @@ void player_update_skills_state(Player *player){
     assert(player);
     for(i = 0; i < SKILL_NUMBER; i++){
         if(player->skills[i].activated
-        && player->mana < player->skills[i].mana_consumption){
-            player->skills[i].activated = 0;
+        && player->mana < skill_mana_consumption(&player->skills[i])){
+            skill_deactivate(&player->skills[i]);
         }
     }
 }
 
 void player_activate_skill(Player *player, SkillType type){
-    assert(type >= 0 && type < SKILL_NUMBER);
-    player->skills[type].activated = 1;
+    skill_check_type(type);
+    skill_activate(&player->skills[type]);
+}
+
+void player_deactivate_all_skills(Player *player){
+    int i;
+    for(i = INVISIBILITY; i <= SPEED; i++){
+        skill_deactivate(player_skill(player, i));
+    }
 }
 
 int player_consume_mana(Player *player){
-    int i, count;
+    int i, count, mana;
     for(i = count = 0; i < SKILL_NUMBER; i++){
-        if(player->skills[i].activated
-           && player->mana >= player->skills[i].mana_consumption){
-            count += player->skills[i].mana_consumption;
+        mana = skill_mana_consumption(&player->skills[i]);
+        if(skill_is_activated(&player->skills[i])
+           && player->mana >= mana){
+            count += mana;
         }
     }
     player->mana -= count;
     return count;
+}
+
+Skill * player_skill(const Player *player, SkillType type){
+    skill_check_type(type);
+    return &player->skills[type];
 }

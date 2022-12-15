@@ -20,6 +20,7 @@
 #include "core/geometry/Rectangle.h"
 #include "model/Room.h"
 #include "core/Timer.h"
+#include "Controller.h"
 #include <MLV/MLV_all.h>
 
 /**
@@ -80,7 +81,7 @@ void view_update_size(View *view, int w, int h);
 /**
  * Draw the info area
  */
-void view_draw_info(View *view, const Room *room);
+void view_draw_info(View *view, const GameData *data);
 
 /**
  * close the view
@@ -107,5 +108,11 @@ void view_update_time(View *view);
  * @param p2
  */
 void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2);
+
+void view_draw_guards(View *view, const Guard *guards);
+
+void view_draw_relics(View *view, const Relic *relics);
+
+void view_draw_player(View *view, const Player *character);
 
 #endif /* STEALTH_VIEW_H */

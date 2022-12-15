@@ -19,6 +19,12 @@ typedef struct skill {
     int mana_consumption;
 } Skill;
 
+void skill_check_type(SkillType type);
 void skill_init(Skill *skill, SkillType type);
+int skill_mana_consumption(const Skill *skill);
+int skill_is_activated(const Skill *skill);
+
+void skill_activate(Skill *skill);
+void skill_deactivate(Skill *skill);
 
 #endif /* STEALTH_SKILL_H */

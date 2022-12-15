@@ -21,14 +21,9 @@
 
 typedef struct {
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
-    Player player;
-    Guard guards[GUARD_NUMBER];
-    Relic relics[RELICS_NUMBER];
 } Room;
 
 void room_init(Room *room);
-
-void room_print(Room room);
 
 /**
  * Test if the entity is colliding a wall of the room
@@ -39,19 +34,6 @@ void room_print(Room room);
  * @return 1 if entity has collided 0 if not
  */
 int room_resolve_collision(Room *room, Position *position);
-
-/**
- * Moves the player according to a given direction
- * @param room
- * @param direction
- */
-void room_move_player(Room *room, Direction direction);
-
-/**
- * Moves the guards of the room
- * @param room
- */
-void room_move_guards(Room *room);
 
 /**
  * Check if a tile of a given type is on the
@@ -65,26 +47,6 @@ void room_move_guards(Room *room);
 int room_tile_between(const Room *room, const Position *p1, const Position *p2, TileType tile_type);
 
 /**
- * Put guards in panic mode
- * @param room
- */
-void room_check_guard_panic(Room *room);
-
-/**
- * Check if any guards detected the player
- * @param room
- * @return 1 if caught, otherwise 0
- */
-int room_check_guards_find_player(Room *room);
-
-/**
- * Get the mana or the relics if the player
- * is on one of these tiles
- * @param room
- */
-void room_check_player(Room *room);
-
-/**
  * Set a given amount of mana tiles
  * in the room
  * @param room
@@ -92,11 +54,18 @@ void room_check_player(Room *room);
  */
 void room_add_mana(Room *room, int amount);
 
+
+
+int room_get_tile_type(const Room *room, int i, int j);
+
+Tile * room_get_tile(Room *room, int i, int j);
+
 /**
- * Return the number of stolen relics
+ * Get a random tile index of a given type
  * @param room
- * @return
+ * @param tile_type the type of tile to get
+ * @return 1 if indexes found, otherwise 0
  */
-int room_stolen_relic_count(const Room *room);
+int room_random_position(const Room *room, TileType tile_type, int *res_x, int *res_y);
 
 #endif /* STEALTH_ROOM_H */

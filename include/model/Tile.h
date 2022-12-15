@@ -22,5 +22,6 @@ typedef struct {
 
 
 void print_tile(Tile tile);
-
+int tile_get_type(const Tile *tile);
+void tile_set_type(Tile *tile, TileType type);
 #endif
