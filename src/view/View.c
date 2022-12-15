@@ -18,7 +18,7 @@ static void view_init_images(View *view){
     MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
     view->images[IMAGE_WALL] = MLV_copy_partial_image(tmp, 256, 32, 8, 8);
     view->images[IMAGE_EMPTY] = MLV_copy_partial_image(tmp, 110, 240, 9, 9);
-    view->images[IMAGE_RELIC] = MLV_copy_partial_image(tmp, 143, 160, 9, 9);
+    view->images[IMAGE_RELIC] = MLV_copy_partial_image(tmp, 144, 160, 8, 8);
     MLV_free_image(tmp);
 }
 
@@ -60,6 +60,9 @@ void view_draw_stolen_relics(View *view, int n){
             , relic.w
             , relic.h
             , MLV_COLOR_GREEN3);
+    MLV_Image *tmp = MLV_copy_image(view->images[IMAGE_RELIC]);
+    MLV_resize_image_with_proportions(tmp, relic.w, relic.h);
+    MLV_draw_image(tmp, relic.origin.x, relic.origin.y);
     /* Draw the number of stolen relics */
     sprintf(buffer, "x %d", n);
     MLV_draw_text_with_font(relic.origin.x + relic.w +  view->info_area.w * 0.01
