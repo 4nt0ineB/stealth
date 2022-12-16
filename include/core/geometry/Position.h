@@ -55,4 +55,6 @@ void position_interpolate_with_y(const Position *a, const Position *b, Position 
 
 double vector_mag(const Vector *v);
 
+int is_at_spawn(const Position a);
+
 #endif /* STEALTH_POSITION_H */

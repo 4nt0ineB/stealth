@@ -48,3 +48,8 @@ void position_interpolate_with_y(const Position *a, const Position *b, Position 
 int is_same_position(const Position *a, const Position *b){
     return (a->x == b->x && a->y == b->y);
 }
+
+int is_at_spawn(const Position a){
+    /*Spawn is defined to be top left corner 2*2 tile after the wall that's why 1 because 0 is wall*/
+    return a.x > 1 && a.x <= 3 && a.y > 1 && a.y <= 3;
+}

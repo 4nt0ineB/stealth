@@ -21,7 +21,7 @@ int slealth_controller() {
     }
     MLV_play_music(data.music_room, 0.5f, -1);
     int i;
-    while (1) {
+    while (!controller_win(&data)) {
         /* Display the current frame, sample function */
         view_update_time(&view);
         controller_check_player(&data);
@@ -288,4 +288,12 @@ static Direction get_direction_from_keyboard() {
         direction = E;
     else direction = STILL;
     return direction;
+}
+
+static int controller_player_at_spawn(const Player player){
+    return is_at_spawn(player.position);
+}
+
+int controller_win(const GameData *data){
+    return controller_stolen_relic_count(data) == RELICS_NUMBER && controller_player_at_spawn(data->player);
 }
