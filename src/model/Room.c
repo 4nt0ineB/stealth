@@ -32,10 +32,10 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
             j = y_max - 3;
         }
         /* Creating the Wall that divide the 2 spaces at x/2 */
-        for (; i < j; i++)
+        for (; i <= j; i++)
             room->tiles[i][x_min + compartiment_x].type = WALL;
-        generate_room(room, x_min, y_min, compartiment_x + x_min, y_max);
-        generate_room(room, compartiment_x + x_min, y_min, x_max, y_max);
+        generate_room(room, x_min, y_min, compartiment_x + x_min - 1, y_max);
+        generate_room(room, compartiment_x + x_min + 1, y_min, x_max, y_max);
     }
     else {
         /* Compartiment from y distance */
@@ -57,10 +57,10 @@ void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
             j = x_max - 3;
         }
         /* Creating the Wall that divide the 2 spaces at x/2 */
-        for (; i < j; i++)
+        for (; i <= j; i++)
             room->tiles[compartiment_y + y_min][i].type = WALL;
-        generate_room(room, x_min, y_min, x_min, y_min + compartiment_y);
-        generate_room(room, x_min, y_min + compartiment_y, x_max, y_max);
+        generate_room(room, x_min, y_min, x_min, y_min + compartiment_y - 1);
+        generate_room(room, x_min, y_min + compartiment_y + 1, x_max, y_max);
     }
 }
 
@@ -92,7 +92,7 @@ void room_init(Room *room){
         }
     }
     /* Generate inview->side walls*/
-    generate_room(room, 1, 1, ROOM_WIDTH - 2, ROOM_HEIGHT - 2);
+    generate_room(room, 1, 1, ROOM_WIDTH - 1, ROOM_HEIGHT - 1);
 }
 
 int room_resolve_collision(Room *room, Position *position){

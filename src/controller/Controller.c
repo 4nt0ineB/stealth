@@ -20,8 +20,8 @@ int slealth_controller() {
         return 1;
     }
     MLV_play_music(data.music_room, 0.5f, -1);
-    int i;
-    while (!controller_win(&data)) {
+    int i, win;
+    while (!(win = controller_win(&data))) {
         /* Display the current frame, sample function */
         view_update_time(&view);
         controller_check_player(&data);
@@ -58,6 +58,10 @@ int slealth_controller() {
         controller_move_guards(&data);
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
+    }
+    if (win){
+        /* Win game screen */
+        ;
     }
     view_free(&view);
     MLV_free_audio();
