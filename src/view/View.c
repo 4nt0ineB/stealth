@@ -1,6 +1,6 @@
 /*
  *   This file is part of Stealth game
- *   Copyleft 2022 Yann ROUX--DAUGROIS
+ *    Yann ROUX--DAUGROIS
  *   and Antoine Bastos
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -16,16 +16,18 @@
 
 static void view_init_images(View *view){
     MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
-    view->images[IMAGE_WALL] = MLV_copy_partial_image(tmp, 256, 32, 8, 8);
-    view->images[IMAGE_EMPTY] = MLV_copy_partial_image(tmp, 110, 240, 9, 9);
-    view->images[IMAGE_RELIC] = MLV_copy_partial_image(tmp, 144, 160, 8, 8);
+    view->images[IMAGE_WALL] =
+            MLV_copy_partial_image(tmp, 256, 32, 8, 8);
+    view->images[IMAGE_EMPTY] =
+            MLV_copy_partial_image(tmp, 110, 240, 9, 9);
+    view->images[IMAGE_RELIC] =
+            MLV_copy_partial_image(tmp, 144, 160, 8, 8);
     MLV_free_image(tmp);
 }
 
 void view_init(View *view){
     rectangle_init(&view->info_area, 0, 0, 0, 0);
     view->available_area = view->game_area = view->info_area;
-    view->timer = NULL;
     view->side = 0;
     view->font = NULL;
     view->bg_color = MLV_COLOR_BLACK;
@@ -36,8 +38,6 @@ void view_init(View *view){
     /* Set window dimension to default values */
     view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
                      (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
-    view->timer = new_timer();
-    timer_start(view->timer);
     view_init_images(view);
 }
 
@@ -49,8 +49,10 @@ void view_draw_stolen_relics(View *view, int n){
     double square_size = view->info_area.h / 2.0;
     Rectangle relic = {
             .origin = {
-                    .x = view->info_area.origin.x + view->info_area.w * 0.1,
-                    .y = view->info_area.origin.y + view->info_area.h / 2 - square_size / 2
+                    .x = view->info_area.origin.x
+                            + view->info_area.w * 0.1,
+                    .y = view->info_area.origin.y
+                            + view->info_area.h / 2 - square_size / 2
             },
             .h = square_size,
             .w = square_size
@@ -147,7 +149,7 @@ void view_draw_info(View *view, const GameData *data){
     /* * * * * * * * *
      * Draw timer *
      * * * * * * * * */
-    timer_sprintf(view->timer, buffer);
+    timer_sprintf(data->timer, buffer);
     /* * * * * * * * *
      * Draw timer    *
      * * * * * * * * */
@@ -160,10 +162,6 @@ void view_draw_info(View *view, const GameData *data){
     view_draw_mana_bar(view, data);
     view_draw_stolen_relics(view, controller_stolen_relic_count(data));
     view_draw_player_skills_info(view, &data->player);
-}
-
-void view_update_time(View *view){
-    timer_update(view->timer);
 }
 
 void view_draw_util(View *view){
@@ -217,10 +215,19 @@ static void view_get_absolute_position(View *view, const Position *position, Pos
     result->y = view->game_area.origin.y + position->y * view->side;
 }
 
-void view_draw_player(View *view, const Player *character){
+void view_draw_player(View *view, const Player *player){
     Position pos;
-    view_get_absolute_position(view, &character->position, &pos);
-    MLV_draw_filled_circle(pos.x, pos.y, view->side / 2, MLV_COLOR_RED);
+    MLV_Color color = MLV_COLOR_RED;
+    unsigned char r,g,b,a;
+    view_get_absolute_position(view, &player->position, &pos);
+    if(skill_is_activated(player_skill(player, SPEED))){
+        color = MLV_rgba(0, 251, 255,255);
+    }
+    if(skill_is_activated(player_skill(player, INVISIBILITY))){
+        MLV_convert_color_to_rgba(color, &r, &g, &b, &a);
+        color = MLV_rgba(r, g, b, 127);
+    }
+    MLV_draw_filled_circle(pos.x, pos.y, view->side / 2, color);
 }
 
 void view_draw_relic(View *view, const Relic *relic){
@@ -268,18 +275,18 @@ void view_draw_relics(View *view, const Relic *relics){
     }
 }
 
-void view_draw_guards(View *view, const Guard *guards){
+void view_draw_guards(View *view, const GameData *data){
     int i;
     /* Guards */
     for(i = 0; i < GUARD_NUMBER; i++){
-        view_draw_guard(view, &guards[i]);
+        view_draw_guard(view, &data->guards[i]);
     }
     /* show panic mode with red filter */
-    if(guard_is_panicking(&guards[0])){
+    if(guard_is_panicking(&data->guards[0])){
         /* We use the clock as a way of modulate the aplha
          * of the filter */
         /* cos^2  ->  [0, 1] */
-        double alpha = cos(view->timer->end.tv_sec);
+        double alpha = cos(data->timer->end.tv_sec);
         alpha = alpha * alpha * 70;
         MLV_draw_filled_rectangle(0, 0, MLV_get_window_width(), MLV_get_window_height(),
                                   MLV_rgba(255,0,0, alpha));
@@ -333,9 +340,6 @@ void view_draw_room(View *view, const Room *room){
             pos.x = j;
             pos.y = i;
             view_get_absolute_position(view, &pos, &pos);
-            /*
-             * @Todo delegate
-             * */
             /*if(room_get_tile_type(room, i, j) == EMPTY) continue;*/
             switch (room_get_tile_type(room, i, j)) {
                 case WALL:
@@ -359,6 +363,14 @@ void view_draw_room(View *view, const Room *room){
             }
         }
     }
+    /* spawn */
+    pos.x = 1;
+    pos.y = 1;
+    int spawn_side = view->side * 2;
+    view_get_absolute_position(view, &pos, &pos);
+    MLV_draw_filled_rectangle(pos.x, pos.y,
+                              spawn_side, spawn_side,
+                              MLV_rgba(111, 0, 255, 50));
 }
 
 
@@ -388,7 +400,7 @@ void draw_intersections_with_tiles(View *view, const Room *room, const Position 
     MLV_draw_line(abs_pos1.x,abs_pos1.y,
                   abs_pos2.x,abs_pos2.y,MLV_COLOR_BLACK);
 
-    /* draw intersection */
+    /* draw intersections */
     int i;
     double xa;
     Position pos_a, tmp;
@@ -436,4 +448,108 @@ void draw_intersections_with_tiles(View *view, const Room *room, const Position 
             MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_ORANGE);
         }
     }
+}
+
+void view_ask_string(View *view, const char *title, int len, char *dest){
+    char *input;
+    size_t inputlen;
+    int boxw = (int) view->available_area.w / 5;
+    int boxh = (int) view->available_area.h / 5;
+    int boxx = (view->available_area.w / 2) - (boxw / 2);
+    int boxy = (view->available_area.h / 2) - (boxh / 2);
+    MLV_Color color = MLV_rgba(88, 174, 184, 255);
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
+    MLV_wait_input_box(
+            boxx
+            , boxy
+            , boxw
+            , boxh
+            , bgcolor
+            , color
+            , bgcolor
+            , title
+            , &input
+            );
+    inputlen = strlen(input);
+    memccpy(dest, input, '\0', MIN(inputlen, len));
+    dest[MIN(inputlen, len) + 1] = '\0';
+    free(input);
+}
+
+void view_draw_score_board_impl(const View *view,
+                                int x,
+                                int y,
+                                const char *title,
+                                const Score *scores,
+                                int n,
+                                int (*get_val) (const Score *)){
+    static char buffer[800];
+    buffer[0] = '\0';
+    int i;
+    /* time */
+    char tmpbuff[100] = {0};
+    for(i = 0; i < n; i++){
+        sprintf(tmpbuff, "%*s %-2d\n", (int) strlen(scores[i].name) - NAME_LENGTH , scores[i].name,  get_val(&scores[i]));
+        strcat(buffer, tmpbuff);
+    }
+    int txtbw, txtbh;
+    MLV_Color color = MLV_rgba(88, 174, 184, 255);
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
+    MLV_get_size_of_adapted_text_box(buffer, 5, &txtbw, &txtbh);
+    MLV_draw_adapted_text_box(x - txtbw / 2, y,
+                                        buffer, 5,
+                                        bgcolor, color, bgcolor
+            , MLV_TEXT_CENTER);
+    int txtw, txth;
+    MLV_get_size_of_text_with_font(title, &txtw, &txth, view->font);
+    MLV_draw_text_with_font(x - txtw / 2, y - txth * 2, title, view->font, color);
+}
+
+void view_draw_end_msg(const View *view, const GameData *data, int win) {
+    /* Draw score recap */
+    static char buffer[100];
+    int winw = MLV_get_window_width();
+    int winh = MLV_get_window_height();
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
+    MLV_draw_filled_rectangle(0, 0, winw, winh, bgcolor);
+    if (win) {
+        sprintf(buffer, "Room accomplished in ");
+        timer_sprintf(data->timer, buffer + 21);
+        sprintf(buffer + strlen(buffer), "\n%d mana consumed", data->score.mana);
+    } else {
+        sprintf(buffer, "You have failed");
+    }
+
+    int txtbw, txtbh;
+    MLV_get_size_of_adapted_text_box_with_font(buffer, view->font, 5, &txtbw, &txtbh);
+    MLV_Color color = MLV_rgba(212, 152, 42, 255);
+    MLV_draw_adapted_text_box_with_font(winw / 2 - txtbw / 2, winh * 0.10,
+                                        buffer, view->font, 5,
+                                        bgcolor, color, bgcolor, MLV_TEXT_CENTER);
+}
+
+void view_draw_score_board(const View *view,
+                           const GameData *data,
+                           const Score *scores_mana,
+                           int nmana,
+                           const Score *scores_time,
+                           int ntime){
+    int winw = MLV_get_window_width();
+    int winh = MLV_get_window_height();
+    /* time */
+    view_draw_score_board_impl(view, winw / 4, winh / 3,
+                               "Best times",
+                               scores_time, nmana, score_get_time);
+    /* mana */
+    view_draw_score_board_impl(view, winw - winw / 4, winh / 3,
+                               "Best mana consumption",
+                               scores_mana, ntime, score_get_mana);
+}
+
+
+
+
+
+void view_draw_menu(View *view, const char **choices, const char *enhanced_choice){
+    ;
 }

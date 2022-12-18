@@ -24,15 +24,11 @@
 #include <MLV/MLV_all.h>
 
 typedef enum {
-    IMAGE_WALL,
-    IMAGE_EMPTY,
-    IMAGE_RELIC
-
+    IMAGE_WALL
+    , IMAGE_EMPTY
+    , IMAGE_RELIC
 } ImageType ;
 
-/**
- * There is only one possible running window with MLV so why not use a global
- */
 typedef struct {
     int side;
     /**
@@ -56,7 +52,6 @@ typedef struct {
     Rectangle game_area;
     MLV_Color bg_color;
     MLV_Font *font;
-    Timer *timer;
     MLV_Image *images[IMAGE_RELIC + 1];
 } View;
 
@@ -114,12 +109,31 @@ void view_update_time(View *view);
  * @param p1
  * @param p2
  */
-void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2);
+void draw_intersections_with_tiles(View *view,
+                                   const Room *room,
+                                   const Position *p1,
+                                   const Position *p2);
 
-void view_draw_guards(View *view, const Guard *guards);
-
+void view_draw_guards(View *view, const GameData *data);
 void view_draw_relics(View *view, const Relic *relics);
+void view_draw_player(View *view, const Player *player);
 
-void view_draw_player(View *view, const Player *character);
+void view_ask_string(View *view,
+                     const char *title,
+                     int len,
+                     char *dest);
+
+void view_draw_score_board(const View *view,
+                           const GameData *data,
+                           const Score *scores_mana,
+                           int nmana,
+                           const Score *scores_time,
+                           int ntime);
+
+void view_draw_menu(View *view,
+                    const char **choices,
+                    const char *enhanced_choice);
+
+void view_draw_end_msg(const View *view, const GameData *data, int win);
 
 #endif /* STEALTH_VIEW_H */

@@ -10,13 +10,18 @@
 
 #include "core/Settings.h"
 #include "model/Room.h"
+#include "core/Timer.h"
+
+#include "model/Score.h"
 #include <MLV/MLV_all.h>
 
 typedef struct game_data {
     Player player;
+    Score score;
     Relic relics[RELICS_NUMBER];
     Guard guards[GUARD_NUMBER];
     Room room;
+    Timer *timer;
     MLV_Music *music_room;
     MLV_Music *music_alarm;
     MLV_Music *music_menu;
@@ -25,8 +30,8 @@ typedef struct game_data {
 }GameData;
 
 
+int controller_menu();
 
-int slealth_controller();
 
 
 void controller_init(GameData *data);
@@ -81,5 +86,7 @@ void controller_check_player(GameData *data);
  * @return
  */
 int controller_stolen_relic_count(const GameData *data);
+
+void controller_update_time(GameData *data);
 
 #endif /* STEALTH_CONTROLLER_H */ 

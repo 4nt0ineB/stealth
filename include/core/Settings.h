@@ -43,6 +43,10 @@
 #define SKILL_NUMBER 2
 #define SKILL_MAX_SPEED 9
 
+/* Score */
+#define NAME_LENGTH 20
+#define SCORE_SAVED 20
+
 /*********************
  * GUI configuration *
  *********************/

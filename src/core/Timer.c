@@ -1,6 +1,6 @@
 /*
  *   This file is part of Stealth game
- *   Copyleft 2022 Yann ROUX--DAUGROIS
+ *    Yann ROUX--DAUGROIS
  *   and Antoine Bastos
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -19,8 +19,13 @@
  */
 
 
-int timer_diff_time(struct timeval start, struct timeval end){
+unsigned long long timer_diff_time(struct timeval start, struct timeval end){
     return (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
+}
+
+
+unsigned long long timer_get_delta(const Timer *t){
+    return timer_diff_time(t->start, t->end);
 }
 
 int timer_ms_to_ss(int ms) {
@@ -53,9 +58,6 @@ void timer_update(Timer *t){
     gettimeofday(&t->end, NULL);
 }
 
-int timer_get_delta(const Timer *t){
-    return timer_diff_time(t->start, t->end);
-}
 
 void timer_sprintf(const Timer *t, char *buffer){
     int s, m, ms;

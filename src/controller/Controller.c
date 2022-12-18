@@ -3,13 +3,17 @@
 #include "view/View.h"
 #include "controller/Controller.h"
 #include "core/Timer.h"
+#include "view/View.h"
 
 
 static Direction get_direction_from_keyboard();
 static void controller_update_view(GameData *data, View *view);
+int controller_win(const GameData *data);
+void controller_end_game(View *view, GameData *data, int win);
+int stealth_controller(View *view, GameData *data);
 
-int slealth_controller() {
-    int detection_overview = 0;
+
+int controller_menu(){
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
     View view;
@@ -19,53 +23,128 @@ int slealth_controller() {
     if(controller_init_audio(&data)){
         return 1;
     }
-    MLV_play_music(data.music_room, 0.5f, -1);
+    /*while (1){
+        *//* Cap refresh rate *//*
+        MLV_delay_according_to_frame_rate();
+    }*/
+    controller_end_game(&view, &data, stealth_controller(&view, &data));
+    view_free(&view);
+    MLV_free_audio();
+    return 0;
+}
+
+int stealth_controller(View *view, GameData *data) {
+    int detection_overview = 0;
+    MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
+    MLV_Button_state state;
+    int mana;
+    MLV_play_music(data->music_room, 0.5f, -1);
     int i, win;
-    while (!(win = controller_win(&data))) {
+    while (!(win = controller_win(data))) {
         /* Display the current frame, sample function */
-        view_update_time(&view);
-        controller_check_player(&data);
-        if(controller_check_guards_find_player(&data)){
+        controller_update_time(data);
+        controller_check_player(data);
+        if(controller_check_guards_find_player(data)){
             ; /* Player have been caught then display end game screen */
         }
-        controller_check_guard_panic(&data);
-        controller_update_view(&data, &view);
+        controller_check_guard_panic(data);
+        controller_update_view(data, view);
         if(detection_overview)
             for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
-                draw_intersections_with_tiles(&view, &data.room, &data.player.position, &data.guards[i].position);
+                draw_intersections_with_tiles(view, &data->room
+                                              , &data->player.position
+                                              , &data->guards[i].position);
             }
         MLV_update_window();
         /* get keyboard events */
         MLV_get_event(&touche, NULL, NULL, NULL,
                       NULL,NULL, NULL, NULL,&state);
         /* quit with x */
-        if (!MLV_get_keyboard_state(MLV_KEYBOARD_x))
+        if (!MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE))
             break;
+        /* detection overview */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_o))
             detection_overview = !detection_overview;
-        player_deactivate_all_skills(&data.player);
+        /* deactivate skill by default */
+        player_deactivate_all_skills(&data->player);
+        /* SPEED SKILL */
         if(!MLV_get_keyboard_state(MLV_KEYBOARD_RSHIFT)
            || !MLV_get_keyboard_state(MLV_KEYBOARD_LSHIFT)){
-            skill_activate(player_skill(&data.player, SPEED));
+            skill_activate(player_skill(&data->player, SPEED));
         }
+        /* INVISIBILITY SKILL */
         if(!MLV_get_keyboard_state(MLV_KEYBOARD_SPACE)){
-            skill_activate(player_skill(&data.player, INVISIBILITY));
+            skill_activate(player_skill(&data->player, INVISIBILITY));
         }
-        room_add_mana(&data.room, player_consume_mana(&data.player));
-        player_update_skills_state(&data.player);
+        /* regenerate consumed mana in the room */
+        mana = player_consume_mana(&data->player);
+        room_add_mana(&data->room, mana);
+        data->score.mana += mana;
+        /* check if skill should still be activated depending on the players mana */
+        player_update_skills_state(&data->player);
         /* Move entities */
-        controller_move_player(&data, get_direction_from_keyboard());
-        controller_move_guards(&data);
+        controller_move_player(data, get_direction_from_keyboard());
+        controller_move_guards(data);
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
     }
-    if (win){
-        /* Win game screen */
-        ;
+    data->score.time = timer_get_delta(data->timer);
+   return win;
+}
+
+void controller_end_game(View *view, GameData *data, int win){
+    MLV_Event event;
+    MLV_Keyboard_modifier mod;
+    MLV_Keyboard_button sym;
+    MLV_Button_state state;
+    Score scores_mana[SCORE_SAVED + 1] = {0};
+    Score scores_time[SCORE_SAVED + 1] = {0};
+    int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
+    int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
+    MLV_stop_music();
+    MLV_play_music(data->music_menu, 0.5f, -1);
+    view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
+    view_draw_end_msg(view, data, win);
+    MLV_update_window();
+    if(win){
+        /* check if in top score */
+        int in_top_mana = !nmana || score_cmp_mana(&scores_mana[SCORE_SAVED - 1], &data->score) > 0;
+        int in_top_time = !ntime || score_cmp_time(&scores_time[SCORE_SAVED - 1], &data->score) > 0;
+        if(in_top_mana || in_top_time){
+            /* ask name */
+            view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
+            if(in_top_mana){ /* put in mana score board */
+                scores_mana[SCORE_SAVED] = data->score;
+                qsort(scores_mana, SCORE_SAVED + 1, sizeof(Score), score_cmp_mana);
+                score_write("resources/score_mana", scores_mana, MIN(nmana + 1, SCORE_SAVED));
+            }
+            if(in_top_time){ /* put in time score board */
+                scores_time[SCORE_SAVED] = data->score;
+                qsort(scores_time, SCORE_SAVED + 1, sizeof(Score), score_cmp_time);
+                score_write("resources/score_time", scores_time, MIN(ntime + 1, SCORE_SAVED));
+            }
+        }
     }
-    view_free(&view);
-    MLV_free_audio();
-    return 0;
+    nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
+    ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
+    while(1){
+        view_draw_end_msg(view, data, win);
+        view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
+        MLV_update_window();
+        event = MLV_get_event(
+                &sym, &mod, NULL,
+                NULL, NULL,
+                NULL, NULL, NULL,
+                &state
+        );
+        if( event == MLV_KEY
+        && state == MLV_PRESSED
+        && sym == MLV_KEYBOARD_ESCAPE){
+            return;
+        }
+        /* Cap refresh rate */
+        MLV_delay_according_to_frame_rate();
+    }
 }
 
 static void controller_update_view(GameData *data, View *view){
@@ -73,7 +152,7 @@ static void controller_update_view(GameData *data, View *view){
     view_draw_util(view);
     view_draw_room(view, &data->room);
     view_draw_relics(view, data->relics);
-    view_draw_guards(view, data->guards);
+    view_draw_guards(view, data);
     view_draw_player(view, &data->player);
 }
 
@@ -101,6 +180,7 @@ int controller_init_audio(GameData *data){
     }
     data->music_room = MLV_load_music("resources/music/stealth.ogg");
     data->music_alarm = MLV_load_music("resources/music/alarm.ogg");
+    data->music_menu = MLV_load_music("resources/music/menu.ogg");
     data->sound_mana = MLV_load_sound("resources/music/mana.ogg");
     data->sound_relic = MLV_load_sound("resources/music/relic.ogg");
     return 0;
@@ -120,6 +200,9 @@ void controller_init(GameData *data){
     room_add_mana(&data->room, MANA_TILES_NUMBER);
     /* Relics */
     controller_init_relics(data);
+    /* Time */
+    data->timer = new_timer();
+    timer_start(data->timer);
 }
 
 /**
@@ -294,10 +377,14 @@ static Direction get_direction_from_keyboard() {
     return direction;
 }
 
-static int controller_player_at_spawn(const Player player){
-    return is_at_spawn(player.position);
+int controller_win(const GameData *data){
+    return controller_stolen_relic_count(data) == RELICS_NUMBER
+           && data->player.position.x > 1
+           && data->player.position.x <= 3
+           && data->player.position.y > 1
+           && data->player.position.y <= 3;
 }
 
-int controller_win(const GameData *data){
-    return controller_stolen_relic_count(data) == RELICS_NUMBER && controller_player_at_spawn(data->player);
+void controller_update_time(GameData *data){
+    timer_update(data->timer);
 }

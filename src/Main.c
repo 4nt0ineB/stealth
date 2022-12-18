@@ -8,5 +8,5 @@
 
 int main(int args, char *argv[]){
     srand(time(NULL));
-    return slealth_controller();
+    return controller_menu();
 }

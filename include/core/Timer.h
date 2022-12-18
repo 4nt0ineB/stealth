@@ -24,7 +24,9 @@ typedef struct {
     struct timeval end;
 } Timer;
 
-int timer_diff_time(struct timeval start, struct timeval end);
+unsigned long long timer_diff_time(struct timeval start, struct timeval end);
+unsigned long long timer_get_delta(const Timer *t);
+
 int timer_ms_to_ss(int ms);
 int timer_ms_to_s(int ms);
 int timer_ms_to_m(int ms);
@@ -33,7 +35,6 @@ int timer_ms_to_h(int ms);
 Timer * new_timer();
 void timer_start(Timer *t);
 void timer_update(Timer *t);
-int timer_get_delta(const Timer *t);
 void timer_sprintf(const Timer *t, char *buffer);
 void timer_fprint(const Timer *t, FILE *stream);
 void timer_print(const Timer *t);

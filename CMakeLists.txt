@@ -37,7 +37,7 @@ add_executable(stealth
         src/core/Util.c
         include/core/Util.h src/core/Settings.c
         src/core/Timer.c
-        include/core/Timer.h src/model/Skill.c include/model/Skill.h)
+        include/core/Timer.h src/model/Skill.c include/model/Skill.h src/model/Score.c include/model/Score.h)
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros
