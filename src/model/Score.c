@@ -7,8 +7,6 @@
 
 #include "model/Score.h"
 
-
-
 size_t score_read(const char *path, Score *scores, int n){
     FILE *fp = fopen(path, "rb");
     if (!fp) {

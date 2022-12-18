@@ -91,6 +91,7 @@ int stealth_controller(View *view, GameData *data) {
     data->score.time = timer_get_delta(data->timer);
    return win;
 }
+void controller_save_score(View *view, GameData *data);
 
 void controller_end_game(View *view, GameData *data, int win){
     MLV_Event event;
@@ -99,44 +100,18 @@ void controller_end_game(View *view, GameData *data, int win){
     MLV_Button_state state;
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
+    controller_save_score(view, data);
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
     MLV_stop_music();
     MLV_play_music(data->music_menu, 0.5f, -1);
-    view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
-    view_draw_end_msg(view, data, win);
-    MLV_update_window();
-    if(win){
-        /* check if in top score */
-        int in_top_mana = !nmana || score_cmp_mana(&scores_mana[SCORE_SAVED - 1], &data->score) > 0;
-        int in_top_time = !ntime || score_cmp_time(&scores_time[SCORE_SAVED - 1], &data->score) > 0;
-        if(in_top_mana || in_top_time){
-            /* ask name */
-            view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
-            if(in_top_mana){ /* put in mana score board */
-                scores_mana[SCORE_SAVED] = data->score;
-                qsort(scores_mana, SCORE_SAVED + 1, sizeof(Score), score_cmp_mana);
-                score_write("resources/score_mana", scores_mana, MIN(nmana + 1, SCORE_SAVED));
-            }
-            if(in_top_time){ /* put in time score board */
-                scores_time[SCORE_SAVED] = data->score;
-                qsort(scores_time, SCORE_SAVED + 1, sizeof(Score), score_cmp_time);
-                score_write("resources/score_time", scores_time, MIN(ntime + 1, SCORE_SAVED));
-            }
-        }
-    }
-    nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
-    ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
     while(1){
         view_draw_end_msg(view, data, win);
         view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
         MLV_update_window();
-        event = MLV_get_event(
-                &sym, &mod, NULL,
-                NULL, NULL,
-                NULL, NULL, NULL,
-                &state
-        );
+        event = MLV_get_event(&sym, &mod,
+                              0,0, 0,0, 0, 0,
+                              &state);
         if( event == MLV_KEY
         && state == MLV_PRESSED
         && sym == MLV_KEYBOARD_ESCAPE){
@@ -144,6 +119,42 @@ void controller_end_game(View *view, GameData *data, int win){
         }
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
+    }
+}
+
+void controller_save_score(View *view, GameData *data){
+    int win = controller_win((const GameData *) &data->player);
+    Score scores_mana[SCORE_SAVED + 1] = {0};
+    Score scores_time[SCORE_SAVED + 1] = {0};
+    int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
+    int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
+    view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
+    view_draw_end_msg(view, data, win);
+    MLV_update_window();
+    if(win){
+        /* check if in top scores */
+        int in_top_mana = !nmana
+                || score_cmp_mana(&scores_mana[SCORE_SAVED - 1], &data->score) > 0;
+        int in_top_time = !ntime
+                || score_cmp_time(&scores_time[SCORE_SAVED - 1], &data->score) > 0;
+        if(in_top_mana || in_top_time){
+            /* ask name */
+            view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
+            /* put in mana score board */
+            if(in_top_mana){
+                scores_mana[SCORE_SAVED] = data->score;
+                qsort(scores_mana, SCORE_SAVED + 1, sizeof(Score), score_cmp_mana);
+                score_write("resources/score_mana",
+                            scores_mana, MIN(nmana + 1, SCORE_SAVED));
+            }
+            /* put in time score board */
+            if(in_top_time){
+                scores_time[SCORE_SAVED] = data->score;
+                qsort(scores_time, SCORE_SAVED + 1, sizeof(Score), score_cmp_time);
+                score_write("resources/score_time",
+                            scores_time, MIN(ntime + 1, SCORE_SAVED));
+            }
+        }
     }
 }
 
@@ -334,8 +345,12 @@ void controller_check_player(GameData *data){
 int controller_check_guards_find_player(GameData *data){
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
+        /* player in view range */
         if(position_dist(&data->guards[i].position, &data->player.position)
            < guard_view_range(&data->guards[i])
+           /* player is visible*/
+           && !skill_is_activated(player_skill(&data->player, INVISIBILITY))
+           /* no wall between them */
            && !room_tile_between(&data->room, &data->guards[i].position,
                                  &data->player.position, WALL)){
             return 1;

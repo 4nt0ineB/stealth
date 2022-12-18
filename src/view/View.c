@@ -31,13 +31,15 @@ void view_init(View *view){
     view->side = 0;
     view->font = NULL;
     view->bg_color = MLV_COLOR_BLACK;
-    MLV_create_window("Slealth", "", 1, 1);
-
+    /*MLV_create_window("Stealth", "", 1, 1);*/
+    MLV_create_full_screen_window("Stealth", "",
+                                  MLV_get_desktop_width(), MLV_get_desktop_height());
     /* Default frame rate */
     MLV_change_frame_rate( FPS );
     /* Set window dimension to default values */
-    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
-                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+   /* view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);*/
+    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
     view_init_images(view);
 }
 
@@ -489,7 +491,7 @@ void view_draw_score_board_impl(const View *view,
     /* time */
     char tmpbuff[100] = {0};
     for(i = 0; i < n; i++){
-        sprintf(tmpbuff, "%*s %-2d\n", (int) strlen(scores[i].name) - NAME_LENGTH , scores[i].name,  get_val(&scores[i]));
+        sprintf(tmpbuff, "%s%25d\n", scores[i].name,  get_val(&scores[i]));
         strcat(buffer, tmpbuff);
     }
     int txtbw, txtbh;
@@ -499,7 +501,7 @@ void view_draw_score_board_impl(const View *view,
     MLV_draw_adapted_text_box(x - txtbw / 2, y,
                                         buffer, 5,
                                         bgcolor, color, bgcolor
-            , MLV_TEXT_CENTER);
+            , MLV_TEXT_RIGHT);
     int txtw, txth;
     MLV_get_size_of_text_with_font(title, &txtw, &txth, view->font);
     MLV_draw_text_with_font(x - txtw / 2, y - txth * 2, title, view->font, color);
@@ -545,10 +547,6 @@ void view_draw_score_board(const View *view,
                                "Best mana consumption",
                                scores_mana, ntime, score_get_mana);
 }
-
-
-
-
 
 void view_draw_menu(View *view, const char **choices, const char *enhanced_choice){
     ;
