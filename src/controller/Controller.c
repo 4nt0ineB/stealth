@@ -14,8 +14,6 @@ int stealth_controller(View *view, GameData *data);
 
 
 int controller_menu(){
-    MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
-    MLV_Button_state state;
     View view;
     GameData data;
     controller_init(&data);
