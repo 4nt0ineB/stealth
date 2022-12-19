@@ -517,9 +517,9 @@ void view_draw_end_msg(const View *view, const GameData *data, int win) {
     if (win) {
         sprintf(buffer, "Room accomplished in ");
         timer_sprintf(data->timer, buffer + 21);
-        sprintf(buffer + strlen(buffer), "\n%d mana consumed", data->score.mana);
+        sprintf(buffer + strlen(buffer), "\n%d mana consumed\npress r to retry", data->score.mana);
     } else {
-        sprintf(buffer, "You have failed");
+        sprintf(buffer, "You have failed\n press r to retry");
     }
 
     int txtbw, txtbh;

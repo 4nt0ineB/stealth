@@ -9,26 +9,27 @@
 static Direction get_direction_from_keyboard();
 static void controller_update_view(GameData *data, View *view);
 int controller_win(const GameData *data);
-void controller_end_game(View *view, GameData *data, int win);
+int controller_end_game(View *view, GameData *data, int win);
 int stealth_controller(View *view, GameData *data);
 
 
 int controller_menu(){
     View view;
     GameData data;
+    int retry = 0;
     controller_init(&data);
     view_init(&view);
     if(controller_init_audio(&data)){
-        return 1;
+        return -1;
     }
     /*while (1){
         *//* Cap refresh rate *//*
         MLV_delay_according_to_frame_rate();
     }*/
-    controller_end_game(&view, &data, stealth_controller(&view, &data));
+    retry = controller_end_game(&view, &data, stealth_controller(&view, &data));
     view_free(&view);
     MLV_free_audio();
-    return 0;
+    return retry; /* 1 for retry 0 else*/
 }
 
 int stealth_controller(View *view, GameData *data) {
@@ -58,8 +59,10 @@ int stealth_controller(View *view, GameData *data) {
         MLV_get_event(&touche, NULL, NULL, NULL,
                       NULL,NULL, NULL, NULL,&state);
         /* quit with x */
-        if (!MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE))
+        if (!MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE)){
+            /* Should make the game pause maybe ?*/
             break;
+        }
         /* detection overview */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_o))
             detection_overview = !detection_overview;
@@ -91,13 +94,14 @@ int stealth_controller(View *view, GameData *data) {
 }
 void controller_save_score(View *view, GameData *data);
 
-void controller_end_game(View *view, GameData *data, int win){
+int controller_end_game(View *view, GameData *data, int win){
     MLV_Event event;
     MLV_Keyboard_modifier mod;
     MLV_Keyboard_button sym;
     MLV_Button_state state;
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
+    int retry = 0;
     controller_save_score(view, data);
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
@@ -111,13 +115,21 @@ void controller_end_game(View *view, GameData *data, int win){
                               0,0, 0,0, 0, 0,
                               &state);
         if( event == MLV_KEY
-        && state == MLV_PRESSED
-        && sym == MLV_KEYBOARD_ESCAPE){
-            return;
+        && state == MLV_PRESSED){
+
+        if(sym == MLV_KEYBOARD_ESCAPE){
+            break;
+        }
+        else if(sym == MLV_KEYBOARD_r){
+            /* Retry */
+            retry = 1;
+            break;
+        }
         }
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
     }
+    return retry;
 }
 
 void controller_save_score(View *view, GameData *data){
