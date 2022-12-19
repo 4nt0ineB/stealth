@@ -266,7 +266,7 @@ void view_draw_guard(View *view, const Guard *guard){
     MLV_draw_circle(
             pos.x
             , pos.y
-            , view->side * 4 /* @Todo: to change. The guard must have a vision range */
+            , view->side * guard_view_range(guard) /* @Todo: to change. The guard must have a vision range */
             , color);
 }
 
@@ -519,7 +519,7 @@ void view_draw_end_msg(const View *view, const GameData *data, int win) {
         timer_sprintf(data->timer, buffer + 21);
         sprintf(buffer + strlen(buffer), "\n%d mana consumed\npress r to retry", data->score.mana);
     } else {
-        sprintf(buffer, "You have failed\n press r to retry");
+        sprintf(buffer, "You have failed\npress r to retry");
     }
 
     int txtbw, txtbh;
