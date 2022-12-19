@@ -320,7 +320,12 @@ void controller_check_player(GameData *data){
     Tile *tile = room_get_tile(&data->room, (int) current_tile.y, (int) current_tile.x);
     /* Take the mana on the tile if exists */
     if(tile->type == MANA){
-        data->player.mana += 1;
+        /* SPEED skill consume 2 mana per frame 
+        and INVISIBILITY consume 1 mana per frame
+        and 60 fps so player need 60 mana to speed for a single frame
+        there's a lot of mana tiles also so :
+        if tiles get 3 mana each tile 20 tiles = 1 second of speed or 2 second of invisibility seems reasonable*/
+        data->player.mana += 3; /* Previous was 1 */
         tile->type = EMPTY;
         /* mana sound */
         MLV_play_sound(data->sound_mana, 0.1f);
