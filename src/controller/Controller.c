@@ -4,35 +4,84 @@
 #include "controller/Controller.h"
 #include "core/Timer.h"
 #include "view/View.h"
+#include "Button.h"
 
+static int controller_in_spawn(int x, int y);
 
-static Direction get_direction_from_keyboard();
-static void controller_update_view(GameData *data, View *view);
-int controller_win(const GameData *data);
-int controller_end_game(View *view, GameData *data, int win);
-int stealth_controller(View *view, GameData *data);
-
-
-int controller_menu(){
+int controller_run(){
     View view;
     GameData data;
-    int retry = 0;
-    controller_init(&data);
     view_init(&view);
-    if(controller_init_audio(&data)){
-        return -1;
-    }
-    /*while (1){
-        *//* Cap refresh rate *//*
-        MLV_delay_according_to_frame_rate();
-    }*/
-    retry = controller_end_game(&view, &data, stealth_controller(&view, &data));
+    if(controller_init_audio(&data)) return 1;
+    while(controller_menu(&view, &data))
+        do{
+            controller_init(&data);
+        }while(controller_end_game(&view,&data,controller_game_loop(&view, &data)));
     view_free(&view);
     MLV_free_audio();
-    return retry; /* 1 for retry 0 else*/
+    return 0;
 }
 
-int stealth_controller(View *view, GameData *data) {
+int controller_menu(View *view, GameData *data){
+    MLV_Event event;
+    MLV_Keyboard_modifier mod;
+    MLV_Keyboard_button sym;
+    MLV_Button_state state;
+    MLV_Mouse_button mouse_button;
+    int mousex, mousey;
+    Button buttons[2];
+    Button *selected;
+    button_init(&buttons[0], "Fullscreen", 0.9, 0.1);
+    button_init(&buttons[1], "Play", 0.5, 0.5);
+    MLV_play_music(data->music_menu, 0.5f, -1);
+    while(1){
+        /* buttons state */
+        button_unselect_all(buttons, 2);
+        selected = NULL;
+        selected = controller_pos_over_button(view, buttons,2, mousex, mousey);
+        if(selected) button_select(selected);
+        /* window */
+        view_draw_menu(view, buttons, 2);
+        MLV_update_window();
+        /* events */
+        MLV_get_mouse_position(&mousex, &mousey);
+        event = MLV_get_event(&sym, &mod,
+                              0,0, 0,
+                              0, 0, &mouse_button,
+                              &state);
+        if(event == MLV_MOUSE_BUTTON
+        && mouse_button == MLV_BUTTON_LEFT
+        && state == MLV_PRESSED){
+            if(button_is_selected(&buttons[0])){ /* windows size */
+                if(strcmp(buttons[0].label, "Fullscreen") == 0){
+                    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
+                    MLV_enable_full_screen();
+                    strcpy(buttons[0].label, "Windowed");
+                }else{
+                    MLV_disable_full_screen();
+                    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+                                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+                    strcpy(buttons[0].label, "Fullscreen");
+                }
+            }
+            if(button_is_selected(&buttons[1])){ /* play */
+                return 1;
+            }
+        }
+        if(event == MLV_KEY && state == MLV_PRESSED){
+            if(sym == MLV_KEYBOARD_ESCAPE)
+                return 0;
+            else if(sym == MLV_KEYBOARD_RETURN){
+                /* play */
+                return 1;
+            }
+        }
+        /* Cap refresh rate */
+        MLV_delay_according_to_frame_rate();
+    }
+}
+
+int controller_game_loop(View *view, GameData *data) {
     int detection_overview = 0;
     MLV_Keyboard_button touche = MLV_KEYBOARD_NONE;
     MLV_Button_state state;
@@ -92,7 +141,6 @@ int stealth_controller(View *view, GameData *data) {
     data->score.time = timer_get_delta(data->timer);
    return win;
 }
-void controller_save_score(View *view, GameData *data);
 
 int controller_end_game(View *view, GameData *data, int win){
     MLV_Event event;
@@ -101,7 +149,6 @@ int controller_end_game(View *view, GameData *data, int win){
     MLV_Button_state state;
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
-    int retry = 0;
     controller_save_score(view, data);
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
@@ -114,22 +161,17 @@ int controller_end_game(View *view, GameData *data, int win){
         event = MLV_get_event(&sym, &mod,
                               0,0, 0,0, 0, 0,
                               &state);
-        if( event == MLV_KEY
-        && state == MLV_PRESSED){
-
-        if(sym == MLV_KEYBOARD_ESCAPE){
-            break;
-        }
-        else if(sym == MLV_KEYBOARD_r){
-            /* Retry */
-            retry = 1;
-            break;
-        }
+        if(event == MLV_KEY && state == MLV_PRESSED){
+            if(sym == MLV_KEYBOARD_ESCAPE)
+                return 0;
+            else if(sym == MLV_KEYBOARD_r){
+                /* Retry */
+                return 1;
+            }
         }
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
     }
-    return retry;
 }
 
 void controller_save_score(View *view, GameData *data){
@@ -168,10 +210,23 @@ void controller_save_score(View *view, GameData *data){
     }
 }
 
-static void controller_update_view(GameData *data, View *view){
-    view_draw_info(view, data);
-    view_draw_util(view);
+Button * controller_pos_over_button(const View *view, Button *buttons, int n, int x, int y){
+    int i, bw, bh;
+    for(i = 0; i < n; i++){
+        view_get_button_size(view, buttons + i, &bw, &bh);
+        if(x >= buttons[i].x * view->width - bw / 2
+        && x <= buttons[i].x * view->width + bw / 2
+        && y >= buttons[i].y * view->height - bh / 2
+        && y <= buttons[i].y * view->height + bh / 2)
+            return buttons + i;
+    }
+    return NULL;
+}
+
+void controller_update_view(GameData *data, View *view){
     view_draw_room(view, &data->room);
+    /*view_draw_util(view);*/
+    view_draw_info(view, data);
     view_draw_relics(view, data->relics);
     view_draw_guards(view, data);
     view_draw_player(view, &data->player);
@@ -226,12 +281,6 @@ void controller_init(GameData *data){
     timer_start(data->timer);
 }
 
-/**
- * Moves the entity by a given Velocity (speed and direction)
- * @param position
- * @param speed
- * @param direction
- */
 void entity_move(Position *position, double speed, Direction direction){
     assert(position);
     position->x += COMPUTE_MOVE_DIST(speed) * direction_factor[direction][0];
@@ -242,7 +291,8 @@ void controller_move_player(GameData *data, Direction direction){
     assert(data);
     player_update_speed(&data->player, direction);
     entity_move(&data->player.position, data->player.speed, direction);
-    if(room_resolve_collision(&data->room, &data->player.position)){  /* collided */
+    if(room_resolve_collision(&data->room, &data->player.position)){
+        /* collided */
         /* The player is hitting the wall, so the speed must be reset to init speed */
         player_update_speed(&data->player, STILL);
     }
@@ -274,24 +324,6 @@ void controller_make_guards_panic(GameData *data){
     }
 }
 
-/**
- *
- * @param room
- * @param guard
- * @param relic
- * @return
- */
-int controller_guard_sees_missing_relic(const Room *room, const Guard guard, const Relic relic){
-    if(relic.stolen && position_dist(&guard.position, &relic.position)
-                       < guard_view_range(&guard)
-       && !room_tile_between(room, &guard.position, &relic.position, WALL)
-       && !relic.noticed /* can't panic for seeing a stolen relic twice*/
-            ){
-        return 1;
-    }
-    return 0;
-}
-
 int controller_check_guard_panic(GameData *data){
     int i, j;
     /* update all panic counters */
@@ -299,7 +331,7 @@ int controller_check_guard_panic(GameData *data){
     for(i = 0; i < GUARD_NUMBER; i++) {
         guard_update_panic_count(&data->guards[i]);
         for (j = 0; j < RELICS_NUMBER; j++) {
-            if (controller_guard_sees_missing_relic(&data->room, data->guards[i], data->relics[j])) {
+            if (controller_guard_sees_missing_relic(&data->room, &data->guards[i], &data->relics[j])) {
                 /* the missing relic has been noticed by all guards now */
                 data->relics[j].noticed = 1;
                 /* Play alarm sound if not already panicking */
@@ -347,7 +379,7 @@ void controller_check_player(GameData *data){
         for (i = 0; i < RELICS_NUMBER; i++){
             /* No need to calculate pos if the relic is taken even if not the right one */
             if (!data->relics[i].stolen
-                && is_same_position(&current_tile, &data->relics[i].position)){
+                && position_eq(&current_tile, &data->relics[i].position)){
                 /* It's this relic and relic not taken */
                 relic_steal(&data->relics[i]);
                 /* relic steal sound */
@@ -366,8 +398,7 @@ int controller_check_guards_find_player(GameData *data){
            /* player is visible*/
            && !skill_is_activated(player_skill(&data->player, INVISIBILITY))
            /* no wall between them */
-           && !room_tile_between(&data->room, &data->guards[i].position,
-                                 &data->player.position, WALL)){
+           && !room_tile_between(&data->room, &data->guards[i].position, &data->player.position, WALL)){
             return 1;
         }
     }
@@ -381,7 +412,19 @@ int controller_stolen_relic_count(const GameData *data){
     return count;
 }
 
-static Direction get_direction_from_keyboard() {
+
+int controller_win(const GameData *data){
+    return
+    controller_stolen_relic_count(data) == RELICS_NUMBER
+    && controller_in_spawn(data->player.position.x, data->player.position.y);
+    ;
+}
+
+void controller_update_time(GameData *data){
+    timer_update(data->timer);
+}
+
+Direction get_direction_from_keyboard() {
     static Direction direction;
     if (!MLV_get_keyboard_state(MLV_KEYBOARD_z)
         && !MLV_get_keyboard_state(MLV_KEYBOARD_d))
@@ -407,14 +450,21 @@ static Direction get_direction_from_keyboard() {
     return direction;
 }
 
-int controller_win(const GameData *data){
-    return controller_stolen_relic_count(data) == RELICS_NUMBER
-           && data->player.position.x > 1
-           && data->player.position.x <= 3
-           && data->player.position.y > 1
-           && data->player.position.y <= 3;
+int controller_guard_sees_missing_relic(const Room *room, const Guard *guard, const Relic *relic){
+    if(relic->stolen && position_dist(&guard->position, &relic->position)
+                       < guard_view_range(guard)
+       && !room_tile_between(room, &guard->position, &relic->position, WALL)
+       && !relic->noticed /* can't panic for seeing a stolen relic twice */
+            ){
+        return 1;
+    }
+    return 0;
 }
 
-void controller_update_time(GameData *data){
-    timer_update(data->timer);
+
+static int controller_in_spawn(int x, int y){
+    return x > 1
+           && x <= 3
+           && y > 1
+           && y <= 3;
 }

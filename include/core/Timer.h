@@ -24,7 +24,19 @@ typedef struct {
     struct timeval end;
 } Timer;
 
+/**
+ * Diff time as epoch
+ * @param start
+ * @param end
+ * @return
+ */
 unsigned long long timer_diff_time(struct timeval start, struct timeval end);
+
+/**
+ * Elapsed time as epoch
+ * @param t
+ * @return
+ */
 unsigned long long timer_get_delta(const Timer *t);
 
 int timer_ms_to_ss(int ms);

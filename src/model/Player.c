@@ -34,7 +34,7 @@ void player_update_speed(Player *player, Direction direction){
      * */
     double max_speed = skill_is_activated(&player->skills[SPEED]) ? SKILL_MAX_SPEED : PLAYER_MAX_SPEED;
     double new_speed = player->speed + PLAYER_INCR_SPEED;
-    player->speed = MIN(new_speed, max_speed);
+    player->speed = MIN(new_speed, max_speed); /* Cap the speed */
 }
 
 void player_update_skills_state(Player *player){
@@ -75,5 +75,5 @@ int player_consume_mana(Player *player){
 
 Skill * player_skill(const Player *player, SkillType type){
     skill_check_type(type);
-    return &player->skills[type];
+    return (Skill *) &player->skills[type];
 }

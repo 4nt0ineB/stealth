@@ -30,10 +30,28 @@ void position_print(Position *position);
  */
 void position_init(Position *position, int x, int y);
 
+/**
+ * Calculate the distance between two positions
+ * @param a
+ * @param b
+ * @return
+ */
 double position_dist(const Position *a, const Position *b);
 
-int is_same_position(const Position *a, const Position *b);
+/**
+ * Check if two position are equal
+ * @param a
+ * @param b
+ * @return
+ */
+int position_eq(const Position *a, const Position *b);
 
+/**
+ * Subtract two positions
+ * @param a
+ * @param b
+ * @param result
+ */
 void position_sub(const Position *a, const Position *b, Position *result);
 
 /**
@@ -44,6 +62,7 @@ void position_sub(const Position *a, const Position *b, Position *result);
  * @return
  */
 void position_interpolate_with_x(const Position *a, const Position *b, Position *to_find);
+
 /**
  * Interpolate y with a known x on segment
  * @param a
@@ -53,6 +72,11 @@ void position_interpolate_with_x(const Position *a, const Position *b, Position 
  */
 void position_interpolate_with_y(const Position *a, const Position *b, Position *to_find);
 
+/**
+ * Calculate the magnitude of a vector
+ * @param v
+ * @return
+ */
 double vector_mag(const Vector *v);
 
 #endif /* STEALTH_POSITION_H */

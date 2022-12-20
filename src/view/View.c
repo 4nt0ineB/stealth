@@ -14,6 +14,11 @@
 #include <assert.h>
 #include <math.h>
 
+static void view_get_absolute_position(View *view, const Position *position, Position *result);
+static void view_draw_player_skills_info(const View *view, const Player *player);
+static void view_draw_mana_bar(View *view, const GameData *data);
+static void view_draw_stolen_relics(View *view, int n);
+
 static void view_init_images(View *view){
     MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
     view->images[IMAGE_WALL] =
@@ -23,169 +28,44 @@ static void view_init_images(View *view){
     view->images[IMAGE_RELIC] =
             MLV_copy_partial_image(tmp, 144, 160, 8, 8);
     MLV_free_image(tmp);
+    tmp = MLV_load_image("resources/img/bg.png");
+    int imgw = MLV_get_image_width(tmp);
+    int imgh = MLV_get_image_height(tmp);
+    view->images[IMAGE_BG] = MLV_copy_partial_image(tmp, 0, 0, imgw / 3, imgh);
+    MLV_resize_image(view->images[IMAGE_BG], 1920, 1080);
+    MLV_free_image(tmp);
 }
 
 void view_init(View *view){
     rectangle_init(&view->info_area, 0, 0, 0, 0);
     view->available_area = view->game_area = view->info_area;
     view->side = 0;
-    view->font = NULL;
+    view->font_text = NULL;
     view->bg_color = MLV_COLOR_BLACK;
-    /*MLV_create_window("Stealth", "", 1, 1);*/
-    MLV_create_full_screen_window("Stealth", "",
-                                  MLV_get_desktop_width(), MLV_get_desktop_height());
+    MLV_create_window("Stealth", "", 1, 1);
+    /*MLV_create_full_screen_window("Stealth", "",
+                                  MLV_get_desktop_width(), MLV_get_desktop_height());*/
     /* Default frame rate */
     MLV_change_frame_rate( FPS );
     /* Set window dimension to default values */
-   /* view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
-                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);*/
-    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
+    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+
+    /*view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());*/
     view_init_images(view);
-}
-
-void view_draw_stolen_relics(View *view, int n){
-    static char buffer[40] = {0};
-    /* * * * * * * * * * * *
-     * Draw stolen relics  *
-     * * * * * * * * * * * */
-    double square_size = view->info_area.h / 2.0;
-    Rectangle relic = {
-            .origin = {
-                    .x = view->info_area.origin.x
-                            + view->info_area.w * 0.1,
-                    .y = view->info_area.origin.y
-                            + view->info_area.h / 2 - square_size / 2
-            },
-            .h = square_size,
-            .w = square_size
-    };
-    MLV_draw_filled_rectangle( relic.origin.x
-            , relic.origin.y
-            , relic.w
-            , relic.h
-            , MLV_COLOR_GREEN3);
-    MLV_Image *tmp = MLV_copy_image(view->images[IMAGE_RELIC]);
-    MLV_resize_image_with_proportions(tmp, relic.w, relic.h);
-    MLV_draw_image(tmp, relic.origin.x, relic.origin.y);
-    /* Draw the number of stolen relics */
-    sprintf(buffer, "x %d", n);
-    MLV_draw_text_with_font(relic.origin.x + relic.w +  view->info_area.w * 0.01
-            , relic.origin.y + relic.h - relic.h * 0.8
-            , buffer
-            , view->font
-            ,MLV_COLOR_WHITE);
-}
-
-void view_draw_mana_bar(View *view, const GameData *data){
-    static char buffer[40] = {0};
-    /* * * * * * * * *
-     * Draw mana bar *
-     * * * * * * * * */
-    int bar_w = view->info_area.w * 0.1;
-    int bar_h = view->info_area.h * 0.3;
-    Rectangle mana_bar = {
-            .origin = {
-                    .x = view->info_area.w - bar_w - view->info_area.w * 0.02,
-                    .y = view->info_area.h - bar_h - view->info_area.h * 0.1
-            },
-            .w = bar_w,
-            .h = bar_h
-    };
-    /* mana bar background */
-    MLV_draw_filled_rectangle(mana_bar.origin.x
-            , mana_bar.origin.y
-            , mana_bar.w
-            , mana_bar.h
-            , MLV_COLOR_BLACK);
-    /* mana bar quantity */
-    Rectangle mana_quantity;
-    rectangle_with_padding(&mana_bar, 0.02, 0.05, &mana_quantity);
-
-    /* update to proportional quantity */
-    double max_mana =  (MANA_TILES_NUMBER / 4); /* for ux design purpose only */
-    double percentage = (MIN(data->player.mana, max_mana) * 100.0) / max_mana;
-    MLV_draw_filled_rectangle(mana_quantity.origin.x
-            , mana_quantity.origin.y
-            , (mana_quantity.w * percentage) / 100.0
-            , mana_quantity.h
-            , MLV_COLOR_CYAN2);
-    sprintf(buffer, "%d", data->player.mana);
-    /* draw number of mana */
-    MLV_draw_text_with_font(mana_quantity.origin.x + view->info_area.h * 0.1
-            , mana_quantity.origin.y - mana_quantity.h * 0.1
-            , buffer
-            , view->font
-            ,MLV_COLOR_DARK_GREY);
-
-    /* draw "mana" label */
-    int text_w;
-    MLV_get_size_of_text_with_font("Mana", &text_w, NULL, view->font);
-    MLV_draw_text_with_font(mana_quantity.origin.x - text_w - view->info_area.h * 0.1
-            , mana_quantity.origin.y
-            , "Mana"
-            , view->font
-            ,MLV_COLOR_WHITE);
-}
-
-void view_draw_player_skills_info(const View *view, const Player *player){
-    static char buffer[100] = {0};
-    buffer[0] = '\0';
-    int txtw;
-    if(skill_is_activated(player_skill(player, INVISIBILITY))){
-        strcat(buffer, "Invisible");
-    }
-    if(skill_is_activated(player_skill(player, SPEED))){
-        strcat(buffer, " Speed");
-    }
-    MLV_get_size_of_text_with_font(buffer, &txtw, NULL, view->font);
-    MLV_draw_text_with_font(view->info_area.w - txtw - view->info_area.w * 0.1
-                            , view->info_area.h * 0.1
-                            , buffer
-                            ,  view->font
-                            , MLV_COLOR_ORANGE);
-}
-
-void view_draw_info(View *view, const GameData *data){
-    static char buffer[40] = {0};
-    draw_rectangle(view, &view->info_area, MLV_COLOR_GRAY50);
-    /* * * * * * * * *
-     * Draw timer *
-     * * * * * * * * */
-    timer_sprintf(data->timer, buffer);
-    /* * * * * * * * *
-     * Draw timer    *
-     * * * * * * * * */
-    MLV_draw_text_with_font(
-            view->info_area.w / 2
-            , view->info_area.origin.y + view->info_area.h / 3
-            , buffer
-            , view->font
-            ,MLV_COLOR_BLACK);
-    view_draw_mana_bar(view, data);
-    view_draw_stolen_relics(view, controller_stolen_relic_count(data));
-    view_draw_player_skills_info(view, &data->player);
-}
-
-void view_draw_util(View *view){
-    static char buffer[10] = {0};
-    /* draw framerate */
-    draw_rectangle(view, &view->available_area, view->bg_color);
-    sprintf(buffer, "%d fps", MLV_get_frame_rate());
-    MLV_draw_text_with_font(view->available_area.w - view->available_area.w / 10
-            , view->available_area.h - view->available_area.h / 10
-            , buffer
-            , view->font
-            ,MLV_COLOR_ORANGE);
 }
 
 void view_update_size(View *view, int w, int h){
     assert(w > 0 && h > 0);
     /* Update font */
-    if(view->font)
-        MLV_free_font(view->font);
-    view->font = MLV_load_font(
+    if(view->font_text) MLV_free_font(view->font_text);
+    if(view->font_title) MLV_free_font(view->font_title);
+    view->font_text = MLV_load_font(
             RESOURCE("fonts/militech.ttf")
             , (w * FONT_HEIGHT_PERCENT) / 100);
+    view->font_title = MLV_load_font(
+            RESOURCE("fonts/militech.ttf")
+            , (w * FONT_HEIGHT_PERCENT * 2) / 100);
     /* Info area */
     view->info_area.w = (w * DEFAULT_INFO_W_PERCENT) / 100;
     view->info_area.h = (h * DEFAULT_INFO_H_PERCENT) / 100;
@@ -204,26 +84,74 @@ void view_update_size(View *view, int w, int h){
     view->game_area.h = view->side * ROOM_HEIGHT;
     /* Center the game area in the available area */
     view->game_area.origin.x = view->available_area.origin.x
-            + (view->available_area.w - view->game_area.w) / 2;
+                               + (view->available_area.w - view->game_area.w) / 2;
     view->game_area.origin.y = view->available_area.origin.y
-            + (view->available_area.h - view->game_area.h) / 2;
+                               + (view->available_area.h - view->game_area.h) / 2;
     MLV_change_window_size(w, h);
+    view->width = MLV_get_window_width();
+    view->height = MLV_get_window_height();
+    if(view->images[IMAGE_BG])
+        MLV_resize_image(view->images[IMAGE_BG], view->width, view->height);
 }
 
+void view_draw_menu(View *view, const Button *buttons, int n){
+    int i;
+    int txtbw, txtbh;
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+    MLV_Color color = MLV_rgba(84, 174, 179, 0);
+    /* bg */
+    /*MLV_draw_filled_rectangle(0, 0, view->width, view->height, bgcolor);*/
+    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
+    /* title */
+    MLV_get_size_of_adapted_text_box_with_font("Stealth", view->font_title, 5, &txtbw, &txtbh);
+    MLV_draw_adapted_text_box_with_font(view->width / 2 - txtbw / 2, view->height * 0.25,
+                                        "Stealth", view->font_title, 5,
+                                        bgcolor, color, bgcolor,
+                                        MLV_TEXT_CENTER);
+    /* buttons */
+    for(i = 0; i < n; i++) view_draw_button(view, &buttons[i]);
+}
 
+void view_draw_info(View *view, const GameData *data){
+    static char buffer[40] = {0};
+    draw_rectangle(view, &view->info_area, 0);
+    /* * * * * * * * *
+     * Draw timer *
+     * * * * * * * * */
+    timer_sprintf(data->timer, buffer);
+    /* * * * * * * * *
+     * Draw timer    *
+     * * * * * * * * */
+    MLV_draw_text_with_font(
+            view->info_area.w / 2
+            , view->info_area.origin.y + view->info_area.h / 3
+            , buffer
+            , view->font_text
+            ,MLV_COLOR_BLACK);
+    view_draw_mana_bar(view, data);
+    view_draw_stolen_relics(view, controller_stolen_relic_count(data));
+    view_draw_player_skills_info(view, &data->player);
+}
 
-static void view_get_absolute_position(View *view, const Position *position, Position *result){
-    result->x = view->game_area.origin.x + position->x * view->side;
-    result->y = view->game_area.origin.y + position->y * view->side;
+void view_draw_util(View *view){
+    static char buffer[10] = {0};
+    /* draw framerate */
+    /* draw_rectangle(view, &view->available_area, view->bg_color); */
+    sprintf(buffer, "%d fps", MLV_get_frame_rate());
+    MLV_draw_text_with_font(view->available_area.w - view->available_area.w / 10
+            , view->available_area.h - view->available_area.h / 10
+            , buffer
+            , view->font_text
+            ,MLV_COLOR_ORANGE);
 }
 
 void view_draw_player(View *view, const Player *player){
     Position pos;
-    MLV_Color color = MLV_COLOR_RED;
+    MLV_Color color = MLV_rgba(0, 99, 80, 255);
     unsigned char r,g,b,a;
     view_get_absolute_position(view, &player->position, &pos);
     if(skill_is_activated(player_skill(player, SPEED))){
-        color = MLV_rgba(0, 251, 255,255);
+        color = MLV_rgba(0, 231, 211,  255);
     }
     if(skill_is_activated(player_skill(player, INVISIBILITY))){
         MLV_convert_color_to_rgba(color, &r, &g, &b, &a);
@@ -234,7 +162,7 @@ void view_draw_player(View *view, const Player *player){
 
 void view_draw_relic(View *view, const Relic *relic){
     Position pos;
-    MLV_Color color = relic_is_stolen(relic) ? MLV_rgba(0, 0, 0, 0) : MLV_COLOR_GREEN3;
+    MLV_Color color = relic_is_stolen(relic) ? MLV_rgba(0, 0, 0, 255) : MLV_COLOR_GREEN3;
     view_get_absolute_position(view, &relic->position, &pos);
     MLV_draw_filled_rectangle(pos.x, pos.y, view->side, view->side, color);
     MLV_draw_rectangle(
@@ -248,14 +176,13 @@ void view_draw_relic(View *view, const Relic *relic){
         MLV_resize_image_with_proportions(view->images[IMAGE_RELIC], view->side, view->side);
         MLV_draw_image(view->images[IMAGE_RELIC], pos.x, pos.y);
     }
-
 }
 
 void view_draw_guard(View *view, const Guard *guard){
     Position pos;
     MLV_Color color;
-    color = MLV_COLOR_BLUE;
-    if(guard->panic_mode) color = MLV_COLOR_YELLOW;
+    color = MLV_rgba(164, 26, 94, 255);
+    if(guard->panic_mode) color = MLV_rgba(255, 75, 250, 255);
     view_get_absolute_position(view, &guard->position, &pos);
     MLV_draw_filled_circle(
             pos.x
@@ -272,9 +199,7 @@ void view_draw_guard(View *view, const Guard *guard){
 
 void view_draw_relics(View *view, const Relic *relics){
     int i;
-    for(i = 0; i < RELICS_NUMBER; i++){
-        view_draw_relic(view, &relics[i]);
-    }
+    for(i = 0; i < RELICS_NUMBER; i++) view_draw_relic(view, &relics[i]);
 }
 
 void view_draw_guards(View *view, const GameData *data){
@@ -290,7 +215,7 @@ void view_draw_guards(View *view, const GameData *data){
         /* cos^2  ->  [0, 1] */
         double alpha = cos(data->timer->end.tv_sec);
         alpha = alpha * alpha * 70;
-        MLV_draw_filled_rectangle(0, 0, MLV_get_window_width(), MLV_get_window_height(),
+        MLV_draw_filled_rectangle(0, 0, view->width, view->height,
                                   MLV_rgba(255,0,0, alpha));
     }
 }
@@ -306,6 +231,7 @@ void view_draw_room(View *view, const Room *room){
     int i, j;
     /* The Background */
     draw_rectangle(view, &view->game_area, MLV_rgba(61, 72, 91,255));
+    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
 
     /* The Grid */
     char thickness = 1;
@@ -375,14 +301,12 @@ void view_draw_room(View *view, const Room *room){
                               MLV_rgba(111, 0, 255, 50));
 }
 
-
-
 void view_free(View *view){
-    MLV_free_font(view->font);
+    MLV_free_font(view->font_text);
+    MLV_free_font(view->font_title);
     int i;
-    for(i = 0; i < IMAGE_RELIC + 1; i++){
+    for(i = 0; i < IMAGE_BG + 1; i++)
         MLV_free_image(view->images[i]);
-    }
     MLV_free_window();
 }
 
@@ -391,7 +315,6 @@ void draw_rectangle(View *view, const Rectangle *rectangle, const MLV_Color colo
             rectangle->origin.x, rectangle->origin.y
             , rectangle->w, rectangle->h, color);
 }
-
 
 void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2){
     assert(p1 && p2);
@@ -496,37 +419,42 @@ void view_draw_score_board_impl(const View *view,
     }
     int txtbw, txtbh;
     MLV_Color color = MLV_rgba(88, 174, 184, 255);
-    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
     MLV_get_size_of_adapted_text_box(buffer, 5, &txtbw, &txtbh);
     MLV_draw_adapted_text_box(x - txtbw / 2, y,
                                         buffer, 5,
                                         bgcolor, color, bgcolor
             , MLV_TEXT_RIGHT);
     int txtw, txth;
-    MLV_get_size_of_text_with_font(title, &txtw, &txth, view->font);
-    MLV_draw_text_with_font(x - txtw / 2, y - txth * 2, title, view->font, color);
+    MLV_get_size_of_text_with_font(title, &txtw, &txth, view->font_text);
+    MLV_draw_text_with_font(x - txtw / 2, y - txth * 2, title, view->font_text, color);
 }
 
 void view_draw_end_msg(const View *view, const GameData *data, int win) {
     /* Draw score recap */
     static char buffer[100];
-    int winw = MLV_get_window_width();
-    int winh = MLV_get_window_height();
-    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
-    MLV_draw_filled_rectangle(0, 0, winw, winh, bgcolor);
+    MLV_Font *font;
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+    /*MLV_draw_filled_rectangle(0, 0, view->width, view->height, bgcolor);*/
+    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
+
+    /* compute proper text */
     if (win) {
         sprintf(buffer, "Room accomplished in ");
         timer_sprintf(data->timer, buffer + 21);
         sprintf(buffer + strlen(buffer), "\n%d mana consumed\npress r to retry", data->score.mana);
+        font = view->font_text;
     } else {
         sprintf(buffer, "You have failed\npress r to retry");
+        font = view->font_title;
     }
 
+    /* Display text */
     int txtbw, txtbh;
-    MLV_get_size_of_adapted_text_box_with_font(buffer, view->font, 5, &txtbw, &txtbh);
     MLV_Color color = MLV_rgba(212, 152, 42, 255);
-    MLV_draw_adapted_text_box_with_font(winw / 2 - txtbw / 2, winh * 0.10,
-                                        buffer, view->font, 5,
+    MLV_get_size_of_adapted_text_box_with_font(buffer, font, 5, &txtbw, &txtbh);
+    MLV_draw_adapted_text_box_with_font(view->width / 2 - txtbw / 2, view->height * 0.10,
+                                        buffer, font, 5,
                                         bgcolor, color, bgcolor, MLV_TEXT_CENTER);
 }
 
@@ -536,18 +464,160 @@ void view_draw_score_board(const View *view,
                            int nmana,
                            const Score *scores_time,
                            int ntime){
-    int winw = MLV_get_window_width();
-    int winh = MLV_get_window_height();
     /* time */
-    view_draw_score_board_impl(view, winw / 4, winh / 3,
+    view_draw_score_board_impl(view, view->width / 4, view->height / 3,
                                "Best times",
                                scores_time, nmana, score_get_time);
     /* mana */
-    view_draw_score_board_impl(view, winw - winw / 4, winh / 3,
+    view_draw_score_board_impl(view, view->width - view->width / 4, view->height / 3,
                                "Best mana consumption",
                                scores_mana, ntime, score_get_mana);
 }
 
-void view_draw_menu(View *view, const char **choices, const char *enhanced_choice){
-    ;
+void view_get_button_size(const View *view, const Button *button, int *width, int *height){
+    int boxw, boxh;
+    MLV_get_size_of_adapted_text_box_with_font(
+            button->label
+            , view->font_text
+            , 5
+            , &boxw
+            , &boxh
+    );
+    if(width) *width = boxw;
+    if(height) *height = boxh;
+}
+
+void view_draw_button(const View *view, const Button *button){
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+    MLV_Color textcolor = MLV_rgba(212, 152, 42, 255);
+    MLV_Color bordercolor = MLV_rgba(18, 20, 33, 0);
+    int w, h;
+    view_get_button_size(view, button, &w, &h);
+    if(button_is_selected(button)){
+        bgcolor = MLV_rgba(48, 54, 89, 255);
+    }
+    MLV_draw_adapted_text_box_with_font(
+            button->x * view->width - w / 2
+            , button->y * view->height - h / 2
+            , button->label
+            , view->font_text
+            , 5
+            , bordercolor
+            , textcolor
+            , bgcolor
+            , MLV_TEXT_CENTER
+            );
+}
+
+/***********
+ *
+ * Static
+ *
+ ***********/
+
+static void view_get_absolute_position(View *view, const Position *position, Position *result){
+    result->x = view->game_area.origin.x + position->x * view->side;
+    result->y = view->game_area.origin.y + position->y * view->side;
+}
+
+static void view_draw_player_skills_info(const View *view, const Player *player){
+    static char buffer[100] = {0};
+    buffer[0] = '\0';
+    int txtw;
+    if(skill_is_activated(player_skill(player, INVISIBILITY))){
+        strcat(buffer, "Invisible");
+    }
+    if(skill_is_activated(player_skill(player, SPEED))){
+        strcat(buffer, " Speed");
+    }
+    MLV_get_size_of_text_with_font(buffer, &txtw, NULL, view->font_text);
+    MLV_draw_text_with_font(view->info_area.w - txtw - view->info_area.w * 0.1
+            , view->info_area.h * 0.1
+            , buffer
+            ,  view->font_text
+            , MLV_COLOR_ORANGE);
+}
+
+static void view_draw_stolen_relics(View *view, int n){
+    static char buffer[40] = {0};
+    /* * * * * * * * * * * *
+     * Draw stolen relics  *
+     * * * * * * * * * * * */
+    double square_size = view->info_area.h / 2.0;
+    Rectangle relic = {
+            .origin = {
+                    .x = view->info_area.origin.x
+                         + view->info_area.w * 0.1,
+                    .y = view->info_area.origin.y
+                         + view->info_area.h / 2 - square_size / 2
+            },
+            .h = square_size,
+            .w = square_size
+    };
+    MLV_draw_filled_rectangle( relic.origin.x
+            , relic.origin.y
+            , relic.w
+            , relic.h
+            , MLV_COLOR_GREEN3);
+    MLV_Image *tmp = MLV_copy_image(view->images[IMAGE_RELIC]);
+    MLV_resize_image_with_proportions(tmp, relic.w, relic.h);
+    MLV_draw_image(tmp, relic.origin.x, relic.origin.y);
+    /* Draw the number of stolen relics */
+    sprintf(buffer, "x %d", n);
+    MLV_draw_text_with_font(relic.origin.x + relic.w +  view->info_area.w * 0.01
+            , relic.origin.y + relic.h - relic.h * 0.8
+            , buffer
+            , view->font_text
+            ,MLV_COLOR_WHITE);
+}
+
+static void view_draw_mana_bar(View *view, const GameData *data){
+    static char buffer[40] = {0};
+    /* * * * * * * * *
+     * Draw mana bar *
+     * * * * * * * * */
+    int bar_w = view->info_area.w * 0.1;
+    int bar_h = view->info_area.h * 0.3;
+    Rectangle mana_bar = {
+            .origin = {
+                    .x = view->info_area.w - bar_w - view->info_area.w * 0.02,
+                    .y = view->info_area.h - bar_h - view->info_area.h * 0.1
+            },
+            .w = bar_w,
+            .h = bar_h
+    };
+    /* mana bar background */
+    MLV_draw_filled_rectangle(mana_bar.origin.x
+            , mana_bar.origin.y
+            , mana_bar.w
+            , mana_bar.h
+            , MLV_COLOR_BLACK);
+    /* mana bar quantity */
+    Rectangle mana_quantity;
+    rectangle_with_padding(&mana_bar, 0.02, 0.05, &mana_quantity);
+
+    /* update to proportional quantity */
+    double max_mana =  (MANA_TILES_NUMBER / 4); /* for ux design purpose only */
+    double percentage = (MIN(data->player.mana, max_mana) * 100.0) / max_mana;
+    MLV_draw_filled_rectangle(mana_quantity.origin.x
+            , mana_quantity.origin.y
+            , (mana_quantity.w * percentage) / 100.0
+            , mana_quantity.h
+            , MLV_COLOR_CYAN2);
+    sprintf(buffer, "%d", data->player.mana);
+    /* draw number of mana */
+    MLV_draw_text_with_font(mana_quantity.origin.x + view->info_area.h * 0.1
+            , mana_quantity.origin.y - mana_quantity.h * 0.1
+            , buffer
+            , view->font_text
+            ,MLV_COLOR_DARK_GREY);
+
+    /* draw "mana" label */
+    int text_w;
+    MLV_get_size_of_text_with_font("Mana", &text_w, NULL, view->font_text);
+    MLV_draw_text_with_font(mana_quantity.origin.x - text_w - view->info_area.h * 0.1
+            , mana_quantity.origin.y
+            , "Mana"
+            , view->font_text
+            ,MLV_COLOR_WHITE);
 }

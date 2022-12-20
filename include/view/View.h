@@ -20,16 +20,20 @@
 #include "core/geometry/Rectangle.h"
 #include "model/Room.h"
 #include "core/Timer.h"
-#include "Controller.h"
+#include "controller/GameData.h"
+#include "Button.h"
 #include <MLV/MLV_all.h>
 
 typedef enum {
     IMAGE_WALL
     , IMAGE_EMPTY
     , IMAGE_RELIC
+    , IMAGE_BG
 } ImageType ;
 
 typedef struct {
+    int width;
+    int height;
     int side;
     /**
      * @brief Zone d'information définit manuellement sous forme
@@ -51,12 +55,15 @@ typedef struct {
      */
     Rectangle game_area;
     MLV_Color bg_color;
-    MLV_Font *font;
-    MLV_Image *images[IMAGE_RELIC + 1];
+    MLV_Font *font_text;
+    MLV_Font *font_title;
+    MLV_Image *images[IMAGE_BG + 1];
 } View;
 
+void view_draw_menu(View *view, const Button *buttons, int n);
+
 /**
- * Init the window and the view for the given dimensions
+ * Init the window and the view
  */
 void view_init(View *view);
 
@@ -99,30 +106,42 @@ void view_free(View *view);
 void draw_rectangle(View *view, const Rectangle *rectangle, MLV_Color color);
 
 /**
- * Update the elapsed time
- */
-void view_update_time(View *view);
-
-/**
  * Just for fun and debugging
  * @param room
  * @param p1
  * @param p2
  */
-void draw_intersections_with_tiles(View *view,
-                                   const Room *room,
-                                   const Position *p1,
-                                   const Position *p2);
+void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2);
 
 void view_draw_guards(View *view, const GameData *data);
+void view_draw_guard(View *view, const Guard *guard);
 void view_draw_relics(View *view, const Relic *relics);
 void view_draw_player(View *view, const Player *player);
 
+/**
+ * Draw a input box with the given title for the user to
+ * write something
+ * @param view
+ * @param title
+ * @param len max size input
+ * @param dest string destination
+ */
 void view_ask_string(View *view,
                      const char *title,
                      int len,
                      char *dest);
 
+/**
+ * Draw the score board
+ * By top mana and by top times
+ *
+ * @param view
+ * @param data
+ * @param scores_mana
+ * @param nmana
+ * @param scores_time
+ * @param ntime
+ */
 void view_draw_score_board(const View *view,
                            const GameData *data,
                            const Score *scores_mana,
@@ -130,10 +149,17 @@ void view_draw_score_board(const View *view,
                            const Score *scores_time,
                            int ntime);
 
-void view_draw_menu(View *view,
-                    const char **choices,
-                    const char *enhanced_choice);
-
+/**
+ * Display the end game screen with
+ * corresponding message
+ * @param view
+ * @param data
+ * @param win
+ */
 void view_draw_end_msg(const View *view, const GameData *data, int win);
+
+void view_draw_button(const View *view, const Button *button);
+
+void view_get_button_size(const View *view, const Button *button, int *width, int *height);
 
 #endif /* STEALTH_VIEW_H */

@@ -21,8 +21,24 @@ typedef struct rectangle {
  */
 void rectangle_print(Rectangle *rectangle);
 
+/**
+ * Set the values of the Rectangle
+ * @param rectangle
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
 void rectangle_init(Rectangle  *rectangle, int x, int y, int w, int h);
 
+/**
+ * For a given rectangle fill the values of an other one as
+ * a centered inner rectangle with padding.
+ * @param rectangle
+ * @param paddingx
+ * @param paddingy
+ * @param result
+ */
 void rectangle_with_padding(const Rectangle *rectangle, double paddingx, double paddingy, Rectangle *result);
 
 #endif /* STEALTH_RECTANGLE_H */

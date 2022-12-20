@@ -32,6 +32,11 @@ typedef struct {
  */
 void player_init(Player *player, int x, int y);
 
+/**
+ * Update the speed for given direction
+ * @param player
+ * @param direction
+ */
 void player_update_speed(Player *player, Direction direction);
 
 /**
@@ -55,9 +60,19 @@ void player_activate_skill(Player *player, SkillType type);
  */
 int player_consume_mana(Player *player);
 
-
+/**
+ * Return a pointer to the skill of given type
+ * of the player
+ * @param player
+ * @param type
+ * @return
+ */
 Skill * player_skill(const Player *player, SkillType type);
 
+/**
+ *
+ * @param player
+ */
 void player_deactivate_all_skills(Player *player);
 
 #endif /* STEALTH_PLAYER_H */
