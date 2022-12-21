@@ -87,15 +87,19 @@ int controller_game_loop(View *view, GameData *data) {
     MLV_Button_state state;
     int mana;
     MLV_play_music(data->music_room, 0.5f, -1);
-    int i, win;
+    int i, win, pause = 0;
+    /* While user didn't press any move key we stay in pause state so 
+    user can see the room and where the relics are ...*/
     while (!(win = controller_win(data))) {
         /* Display the current frame, sample function */
-        controller_update_time(data);
-        controller_check_player(data);
-        if(controller_check_guards_find_player(data)){
-            ; /* Player have been caught then display end game screen */
+        if (!pause){
+            controller_update_time(data);
+            controller_check_player(data);
+            if(controller_check_guards_find_player(data)){
+                ; /* Player have been caught then display end game screen */
+            }
+            controller_check_guard_panic(data);
         }
-        controller_check_guard_panic(data);
         controller_update_view(data, view);
         if(detection_overview)
             for(i = 0; i < GUARD_NUMBER; i++){ /* just for fun and debugging */
@@ -108,33 +112,35 @@ int controller_game_loop(View *view, GameData *data) {
         MLV_get_event(&touche, NULL, NULL, NULL,
                       NULL,NULL, NULL, NULL,&state);
         /* quit with x */
-        if (!MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE)){
-            /* Should make the game pause maybe ?*/
-            break;
+        if (MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE) == MLV_PRESSED){
+            /* Make the game pause and unpause ?*/
+            pause = pause == 1 ? 0 : 1;
         }
         /* detection overview */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_o))
             detection_overview = !detection_overview;
-        /* deactivate skill by default */
-        player_deactivate_all_skills(&data->player);
-        /* SPEED SKILL */
-        if(!MLV_get_keyboard_state(MLV_KEYBOARD_RSHIFT)
-           || !MLV_get_keyboard_state(MLV_KEYBOARD_LSHIFT)){
-            skill_activate(player_skill(&data->player, SPEED));
+        if (!pause){
+            /* deactivate skill by default */
+            player_deactivate_all_skills(&data->player);
+            /* SPEED SKILL */
+            if(!MLV_get_keyboard_state(MLV_KEYBOARD_RSHIFT)
+            || !MLV_get_keyboard_state(MLV_KEYBOARD_LSHIFT)){
+                skill_activate(player_skill(&data->player, SPEED));
+            }
+            /* INVISIBILITY SKILL */
+            if(!MLV_get_keyboard_state(MLV_KEYBOARD_SPACE)){
+                skill_activate(player_skill(&data->player, INVISIBILITY));
+            }
+            /* regenerate consumed mana in the room */
+            mana = player_consume_mana(&data->player);
+            room_add_mana(&data->room, mana);
+            data->score.mana += mana;
+            /* check if skill should still be activated depending on the players mana */
+            player_update_skills_state(&data->player);
+            /* Move entities */
+            controller_move_player(data, get_direction_from_keyboard());
+            controller_move_guards(data);
         }
-        /* INVISIBILITY SKILL */
-        if(!MLV_get_keyboard_state(MLV_KEYBOARD_SPACE)){
-            skill_activate(player_skill(&data->player, INVISIBILITY));
-        }
-        /* regenerate consumed mana in the room */
-        mana = player_consume_mana(&data->player);
-        room_add_mana(&data->room, mana);
-        data->score.mana += mana;
-        /* check if skill should still be activated depending on the players mana */
-        player_update_skills_state(&data->player);
-        /* Move entities */
-        controller_move_player(data, get_direction_from_keyboard());
-        controller_move_guards(data);
         /* Cap refresh rate */
         MLV_delay_according_to_frame_rate();
     }
@@ -272,7 +278,11 @@ void controller_init(GameData *data){
     /* guards */
     int i, x, y;
     for(i = 0; i < GUARD_NUMBER; i++){
-        room_random_position(&data->room, EMPTY, &x, &y);
+        do {
+            room_random_position(&data->room, EMPTY, &x, &y);
+        } while (x < 8 || y < 8);
+        /* Guard can't spawn too close to player else they will see 
+        him before player can even move */
         guard_init(&(data->guards[i]) , x, y);
     }
     /* mana */
