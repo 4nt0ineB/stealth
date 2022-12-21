@@ -1,8 +1,7 @@
 #include "model/Guard.h"
 
 void guard_init(Guard *guard, int x, int y) {
-    guard->position.x = x;
-    guard->position.y = y;
+    position_init(&guard->position, x, y);
     guard->speed = float_rand(GUARD_MIN_SPEED, GUARD_MAX_SPEED);
     guard->direction = STILL;
     guard->panic_mode = 0;

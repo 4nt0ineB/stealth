@@ -1,7 +1,5 @@
 
 #include <assert.h>
-#include <math.h>
-
 #include "model/Room.h"
 #include "core/Util.h"
 
@@ -124,9 +122,13 @@ int room_resolve_collision(Room *room, Position *position){
                 double norm = vector_mag(&distance);
                 if(0.5 - norm > 0){
                     collide = 1;
-                    /* Set back the position of the circle to the legit position */
-                    position->x = nearest.x + 0.5 * (distance.x / norm);
-                    position->y = nearest.y + 0.5 * (distance.y / norm);
+                    if (norm == 0){
+                        position->x = nearest.x + 0.5 * 0;
+                        position->y = nearest.y + 0.5 * 0;
+                    }else {
+                        position->x = nearest.x + 0.5 * (distance.x / norm);
+                        position->y = nearest.y + 0.5 * (distance.y / norm);
+                    }
                 }
             }
         }
