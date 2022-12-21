@@ -145,7 +145,7 @@ int controller_game_loop(View *view, GameData *data) {
         MLV_delay_according_to_frame_rate();
     }
     data->score.time = timer_get_delta(data->timer);
-   return win;
+    return win;
 }
 
 int controller_end_game(View *view, GameData *data, int win){
@@ -476,8 +476,8 @@ int controller_guard_sees_missing_relic(const Room *room, const Guard *guard, co
 
 
 static int controller_in_spawn(int x, int y){
-    return x > 1
+    return x >= 1
            && x <= 3
-           && y > 1
+           && y >= 1
            && y <= 3;
 }
