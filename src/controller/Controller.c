@@ -149,11 +149,11 @@ int controller_end_game(View *view, GameData *data, int win){
     MLV_Button_state state;
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
+    MLV_stop_music();
+    MLV_play_music(data->music_menu, 0.5f, -1);
     controller_save_score(view, data);
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
-    MLV_stop_music();
-    MLV_play_music(data->music_menu, 0.5f, -1);
     while(1){
         view_draw_end_msg(view, data, win);
         view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
@@ -175,9 +175,11 @@ int controller_end_game(View *view, GameData *data, int win){
 }
 
 void controller_save_score(View *view, GameData *data){
+    int i;
     int win = controller_win((const GameData *) &data->player);
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
+    for(i = 0; i < SCORE_SAVED; i++) scores_time[i].time = __LONG_MAX__;
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
     view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
@@ -188,12 +190,13 @@ void controller_save_score(View *view, GameData *data){
         int in_top_mana = !nmana
                 || score_cmp_mana(&scores_mana[SCORE_SAVED - 1], &data->score) > 0;
         int in_top_time = !ntime
-                || score_cmp_time(&scores_time[SCORE_SAVED - 1], &data->score) > 0;
+                || score_cmp_time(&scores_time[ntime - 1], &data->score) > 0;
         if(in_top_mana || in_top_time){
             /* ask name */
             view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
             /* put in mana score board */
             if(in_top_mana){
+                printf("boy");
                 scores_mana[SCORE_SAVED] = data->score;
                 qsort(scores_mana, SCORE_SAVED + 1, sizeof(Score), score_cmp_mana);
                 score_write("resources/score_mana",

@@ -119,15 +119,14 @@ void view_draw_info(View *view, const GameData *data){
      * Draw timer *
      * * * * * * * * */
     timer_sprintf(data->timer, buffer);
-    /* * * * * * * * *
-     * Draw timer    *
-     * * * * * * * * */
+
     MLV_draw_text_with_font(
-            view->info_area.w / 2
+            view->info_area.w / 2 - 50
             , view->info_area.origin.y + view->info_area.h / 3
             , buffer
             , view->font_text
-            ,MLV_COLOR_BLACK);
+            ,MLV_COLOR_DARK_GREY);
+    /* mana / relics / skills */
     view_draw_mana_bar(view, data);
     view_draw_stolen_relics(view, controller_stolen_relic_count(data));
     view_draw_player_skills_info(view, &data->player);
@@ -383,7 +382,7 @@ void view_ask_string(View *view, const char *title, int len, char *dest){
     int boxx = (view->available_area.w / 2) - (boxw / 2);
     int boxy = (view->available_area.h / 2) - (boxh / 2);
     MLV_Color color = MLV_rgba(88, 174, 184, 255);
-    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 255);
+    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 200);
     MLV_wait_input_box(
             boxx
             , boxy
@@ -396,8 +395,8 @@ void view_ask_string(View *view, const char *title, int len, char *dest){
             , &input
             );
     inputlen = strlen(input);
-    memccpy(dest, input, '\0', MIN(inputlen, len));
-    dest[MIN(inputlen, len) + 1] = '\0';
+    memccpy(dest, input, -1, MIN(inputlen, len - 1));
+    dest[MIN(inputlen, len - 1) + 1] = '\0';
     free(input);
 }
 
@@ -407,15 +406,18 @@ void view_draw_score_board_impl(const View *view,
                                 const char *title,
                                 const Score *scores,
                                 int n,
-                                int (*get_val) (const Score *)){
+                                void (*score_to_string)(const Score *score, char *buff)){
     static char buffer[800];
     buffer[0] = '\0';
     int i;
     /* time */
     char tmpbuff[100] = {0};
     for(i = 0; i < n; i++){
-        sprintf(tmpbuff, "%s%25d\n", scores[i].name,  get_val(&scores[i]));
+        sprintf(tmpbuff, "%-20s", scores[i].name);
         strcat(buffer, tmpbuff);
+        score_to_string(&scores[i], tmpbuff);
+        strcat(buffer, tmpbuff);
+        strcat(buffer, "\n");
     }
     int txtbw, txtbh;
     MLV_Color color = MLV_rgba(88, 174, 184, 255);
@@ -467,11 +469,11 @@ void view_draw_score_board(const View *view,
     /* time */
     view_draw_score_board_impl(view, view->width / 4, view->height / 3,
                                "Best times",
-                               scores_time, nmana, score_get_time);
+                               scores_time, ntime, score_sprintf_time);
     /* mana */
     view_draw_score_board_impl(view, view->width - view->width / 4, view->height / 3,
                                "Best mana consumption",
-                               scores_mana, ntime, score_get_mana);
+                               scores_mana, nmana, score_sprintf_mana);
 }
 
 void view_get_button_size(const View *view, const Button *button, int *width, int *height){

@@ -18,7 +18,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-typedef struct {
+typedef struct timer {
     unsigned int state: 1;
     struct timeval start;
     struct timeval end;
@@ -30,14 +30,16 @@ typedef struct {
  * @param end
  * @return
  */
-unsigned long long timer_diff_time(struct timeval start, struct timeval end);
+long timer_diff_time(struct timeval start, struct timeval end);
 
 /**
  * Elapsed time as epoch
  * @param t
  * @return
  */
-unsigned long long timer_get_delta(const Timer *t);
+long timer_get_delta(const Timer *t);
+
+void timer_from_epoch(long epoch, Timer *result);
 
 int timer_ms_to_ss(int ms);
 int timer_ms_to_s(int ms);

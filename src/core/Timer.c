@@ -19,13 +19,19 @@
  */
 
 
-unsigned long long timer_diff_time(struct timeval start, struct timeval end){
+long timer_diff_time(struct timeval start, struct timeval end){
     return (end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000;
 }
 
-
-unsigned long long timer_get_delta(const Timer *t){
+long timer_get_delta(const Timer *t){
     return timer_diff_time(t->start, t->end);
+}
+
+void timer_from_epoch(long epoch, Timer *result){
+    result->start.tv_usec = 0;
+    result->start.tv_sec = 0;
+    result->end.tv_sec = epoch / 1000;
+    result->end.tv_usec = (epoch - result->end.tv_sec * 1000) * 1000;
 }
 
 int timer_ms_to_ss(int ms) {
@@ -60,21 +66,23 @@ void timer_update(Timer *t){
 
 
 void timer_sprintf(const Timer *t, char *buffer){
-    int s, m, ms;
-    ms = timer_get_delta(t);
+    int s, m, ss;
+    unsigned long ms = timer_get_delta(t);
+    ss = timer_ms_to_ss((int) ms);
     s = timer_ms_to_s(ms);
     m = timer_ms_to_m(ms);
     /* @Todo improve function by not printing zero values */
-    sprintf(buffer, "%02d:%02d", m, s);
+    sprintf(buffer, "%02d:%02d:%02d", m, s, ss);
 }
 
 void timer_fprint(const Timer *t, FILE * stream){
-    int ss, s, m, h, ms;
+    int ss, s, m, h;
+    unsigned long ms;
     ms = timer_get_delta(t);
-    ss = timer_ms_to_ss(ms);
-    s = timer_ms_to_s(ms);
-    m = timer_ms_to_m(ms);
-    h = timer_ms_to_h(ms);
+    ss = timer_ms_to_ss((int) ms);
+    s = timer_ms_to_s((int) ms);
+    m = timer_ms_to_m((int) ms);
+    h = timer_ms_to_h((int) ms);
     fprintf(stream, "%02d:%02d:%02d:%02d", h, m, s, ss);
 }
 
