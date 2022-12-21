@@ -1,6 +1,6 @@
 # stealth
 
-// TODO
+## TODO
 
  - Speed feels too high ?
  - Mana score should be from lowest consumption to highest 
