@@ -53,15 +53,12 @@ int controller_menu(View *view, GameData *data){
         && mouse_button == MLV_BUTTON_LEFT
         && state == MLV_PRESSED){
             if(button_is_selected(&buttons[0])){ /* windows size */
-                if(strcmp(buttons[0].label, "Fullscreen") == 0){
-                    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
-                    MLV_enable_full_screen();
-                    strcpy(buttons[0].label, "Windowed");
-                }else{
-                    MLV_disable_full_screen();
-                    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
-                                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+                if(view_is_fullscreen(view)){
+                    view_to_windowed(view);
                     strcpy(buttons[0].label, "Fullscreen");
+                }else{
+                    view_to_fullscreen(view);
+                    strcpy(buttons[0].label, "Windowed");
                 }
             }
             if(button_is_selected(&buttons[1])){ /* play */
@@ -112,10 +109,12 @@ int controller_game_loop(View *view, GameData *data) {
         MLV_get_event(&touche, NULL, NULL, NULL,
                       NULL,NULL, NULL, NULL,&state);
         /* quit with x */
-        if (MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE) == MLV_PRESSED){
+        if (MLV_get_keyboard_state(MLV_KEYBOARD_p) == MLV_PRESSED){
             /* Make the game pause and unpause ?*/
-            pause = pause == 1 ? 0 : 1;
+            pause = pause ? 0 : 1;
         }
+        if(!MLV_get_keyboard_state(MLV_KEYBOARD_ESCAPE))
+            break;
         /* detection overview */
         if (!MLV_get_keyboard_state(MLV_KEYBOARD_o))
             detection_overview = !detection_overview;
@@ -186,6 +185,7 @@ void controller_save_score(View *view, GameData *data){
     Score scores_mana[SCORE_SAVED + 1] = {0};
     Score scores_time[SCORE_SAVED + 1] = {0};
     for(i = 0; i < SCORE_SAVED; i++) scores_time[i].time = __LONG_MAX__;
+    for(i = 0; i < SCORE_SAVED; i++) scores_mana[i].mana = __INT_MAX__;
     int nmana = score_read("resources/score_mana", scores_mana, SCORE_SAVED);
     int ntime = score_read("resources/score_time", scores_time, SCORE_SAVED);
     view_draw_score_board(view, data, scores_mana, nmana, scores_time, ntime);
@@ -196,7 +196,7 @@ void controller_save_score(View *view, GameData *data){
         int in_top_mana = !nmana
                 || score_cmp_mana(&scores_mana[SCORE_SAVED - 1], &data->score) > 0;
         int in_top_time = !ntime
-                || score_cmp_time(&scores_time[ntime - 1], &data->score) > 0;
+                || score_cmp_time(&scores_time[SCORE_SAVED - 1], &data->score) > 0;
         if(in_top_mana || in_top_time){
             /* ask name */
             view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
@@ -330,7 +330,7 @@ void controller_move_guards(GameData *data){
 void controller_make_guards_panic(GameData *data){
     int i;
     for(i = 0; i < GUARD_NUMBER; i++){
-        if (data->guards[i].panic_mode){
+        if (guard_is_panicking(&data->guards[i])){
             /* Then his panic count is reset */
             guard_reset_panic_count(&data->guards[i]);
         } else guard_panic(&data->guards[i]);
@@ -341,11 +341,12 @@ int controller_check_guard_panic(GameData *data){
     int i, j;
     /* update all panic counters */
     int panicking = guard_is_panicking(&data->guards[0]);
+    /* check if any guard see a missing relic */
     for(i = 0; i < GUARD_NUMBER; i++) {
         guard_update_panic_count(&data->guards[i]);
         for (j = 0; j < RELICS_NUMBER; j++) {
             if (controller_guard_sees_missing_relic(&data->room, &data->guards[i], &data->relics[j])) {
-                /* the missing relic has been noticed by all guards now */
+                /* the missing relic is being noticed by all guards now */
                 data->relics[j].noticed = 1;
                 /* Play alarm sound if not already panicking */
                 if(!guard_is_panicking(&data->guards[i])){
@@ -358,7 +359,7 @@ int controller_check_guard_panic(GameData *data){
             }
         }
     }
-    /* No more panicking then restart music */
+    /* No more panicking, then restart music */
     if(panicking != guard_is_panicking(&data->guards[0])){
         MLV_stop_music();
         MLV_play_music(data->music_room, 0.5f, -1);

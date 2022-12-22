@@ -56,7 +56,7 @@ void guard_update_panic_count(Guard *guard){
             guard_reset_panic_count(guard);
             guard_unpanic(guard);
         }
-        guard->panic_count+=1;
+        guard->panic_count += 1;
     }
 }
 

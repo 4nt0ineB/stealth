@@ -31,7 +31,7 @@ size_t score_write(const char *path, Score *scores, int n){
 }
 
 int score_cmp_mana(const void *s1, const void *s2){
-    return ((const Score *) s2)->mana - ((const Score*) s1)->mana;
+    return ((const Score *) s1)->mana - ((const Score*) s2)->mana;
 }
 
 int score_cmp_time(const void *s1, const void *s2){

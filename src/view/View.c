@@ -19,6 +19,24 @@ static void view_draw_player_skills_info(const View *view, const Player *player)
 static void view_draw_mana_bar(View *view, const GameData *data);
 static void view_draw_stolen_relics(View *view, int n);
 
+
+void view_to_fullscreen(View *view){
+    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
+    MLV_enable_full_screen();
+    view->fullscreen = 1;
+}
+
+void view_to_windowed(View *view){
+    MLV_disable_full_screen();
+    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+    view->fullscreen = 0;
+}
+
+int view_is_fullscreen(View *view){
+    return view->fullscreen;
+}
+
 static void view_init_images(View *view){
     MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
     view->images[IMAGE_WALL] =
@@ -43,15 +61,12 @@ void view_init(View *view){
     view->font_text = NULL;
     view->bg_color = MLV_COLOR_BLACK;
     MLV_create_window("Stealth", "", 1, 1);
-    /*MLV_create_full_screen_window("Stealth", "",
-                                  MLV_get_desktop_width(), MLV_get_desktop_height());*/
+    view->fullscreen = 0;
     /* Default frame rate */
     MLV_change_frame_rate( FPS );
     /* Set window dimension to default values */
     view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
                      (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
-
-    /*view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());*/
     view_init_images(view);
 }
 
@@ -202,17 +217,17 @@ void view_draw_relics(View *view, const Relic *relics){
 }
 
 void view_draw_guards(View *view, const GameData *data){
+    double alpha;
     int i;
     /* Guards */
-    for(i = 0; i < GUARD_NUMBER; i++){
+    for(i = 0; i < GUARD_NUMBER; i++)
         view_draw_guard(view, &data->guards[i]);
-    }
     /* show panic mode with red filter */
     if(guard_is_panicking(&data->guards[0])){
         /* We use the clock as a way of modulate the aplha
          * of the filter */
         /* cos^2  ->  [0, 1] */
-        double alpha = cos(data->timer->end.tv_sec);
+        alpha = cos(data->timer->end.tv_sec);
         alpha = alpha * alpha * 70;
         MLV_draw_filled_rectangle(0, 0, view->width, view->height,
                                   MLV_rgba(255,0,0, alpha));

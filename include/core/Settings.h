@@ -20,7 +20,7 @@
 #define SPS 10
 #define PLAYER_INIT_SPEED 0.1
 #define PLAYER_INCR_SPEED 0.03
-#define PLAYER_MAX_SPEED 2
+#define PLAYER_MAX_SPEED 0.9
 #define COMPUTE_MOVE_DIST(v) (((v) * SPS) / FPS)
 
 #define ROOM_HEIGHT 45

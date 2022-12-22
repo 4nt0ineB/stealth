@@ -32,6 +32,7 @@ typedef enum {
 } ImageType ;
 
 typedef struct {
+    int fullscreen;
     int width;
     int height;
     int side;
@@ -86,6 +87,12 @@ void view_draw_room(View *view, const Room *room);
  * @param h
  */
 void view_update_size(View *view, int w, int h);
+
+void view_to_fullscreen(View *view);
+
+void view_to_windowed(View *view);
+
+int view_is_fullscreen(View *view);
 
 /**
  * Draw the info area
