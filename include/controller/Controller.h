@@ -118,6 +118,10 @@ void controller_update_time(GameData *data);
  */
 void entity_move(Position *position, double speed, Direction direction);
 
+/**
+ * Retrieve the user direction control from keyboard interaction
+ * @return
+ */
 Direction get_direction_from_keyboard();
 
 /**
@@ -152,7 +156,7 @@ void controller_save_score(View *view, GameData *data);
 int controller_guard_sees_missing_relic(const Room *room, const Guard *guard, const Relic *relic);
 
 /**
- * Find a player where coordinates are in the button box
+ * Find a button where coordinates are in the box containing it
  * @param buttons
  * @param n
  * @param x

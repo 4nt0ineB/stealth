@@ -19,7 +19,7 @@
 
 #include "core/geometry/Rectangle.h"
 #include "model/Room.h"
-#include "core/Timer.h"
+
 #include "controller/GameData.h"
 #include "Button.h"
 #include <MLV/MLV_all.h>

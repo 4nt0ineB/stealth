@@ -95,12 +95,12 @@ void room_init(Room *room){
 
 int room_resolve_collision(Room *room, Position *position){
     assert(room && position);
-    /* top left tile */
+    /* top left tile - NO */
     Position tl = {
             .x = MAX(0, (int) position->x - 1),
             .y = MAX(0, (int) position->y - 1)
     };
-    /* bottom right tile */
+    /* bottom right tile - SE */
     Position br = {
             .x = MIN(ROOM_WIDTH, (int) position->x + 1),
             .y = MIN(ROOM_HEIGHT, (int) position->y + 1)
@@ -122,13 +122,8 @@ int room_resolve_collision(Room *room, Position *position){
                 double norm = vector_mag(&distance);
                 if(0.5 - norm > 0){
                     collide = 1;
-                    if (norm == 0){
-                        position->x = nearest.x + 0.5 * 0;
-                        position->y = nearest.y + 0.5 * 0;
-                    }else {
-                        position->x = nearest.x + 0.5 * (distance.x / norm);
-                        position->y = nearest.y + 0.5 * (distance.y / norm);
-                    }
+                    position->x = nearest.x + 0.5 * (norm == 0 ? 0: (distance.x / norm));
+                    position->y = nearest.y + 0.5 * (norm == 0 ? 0 : (distance.y / norm));
                 }
             }
         }
