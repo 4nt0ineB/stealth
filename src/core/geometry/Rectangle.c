@@ -8,7 +8,6 @@
 #include "core/geometry/Rectangle.h"
 #include <stdio.h>
 
-
 void rectangle_print(Rectangle *rectangle){
     printf("Rectangle [");
     position_print(&rectangle->origin);

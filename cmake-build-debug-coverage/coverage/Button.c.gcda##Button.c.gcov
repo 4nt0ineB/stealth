@@ -1,0 +1,89 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/controller/Button.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/controller/Button.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/controller/Button.c.gcda
+        -:    0:Runs:1
+        -:    1:/*
+        -:    2: *   This file is part of Stealth game
+        -:    3: *   Copyleft 2022 Yann ROUX--DAUGROIS
+        -:    4: *   and Antoine Bastos
+        -:    5: *   SPDX-License-Identifier: Apache-2.0
+        -:    6: */
+        -:    7:
+        -:    8:#include "Button.h"
+        -:    9:#include <string.h>
+        -:   10:#include <assert.h>
+        -:   11:
+function button_init called 4 returned 100% blocks executed 67%
+        4:   12:void button_init(Button *button, const char *label, double x, double y){
+       4*:   13:    assert(button);
+        4:   13-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:   13-block  1
+call    2 never executed
+       4*:   14:    assert(strlen(label) < BUTTON_LABEL_LEN);
+        4:   14-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:   14-block  1
+call    2 never executed
+        4:   15:    button->x = x;
+        4:   16:    button->y = y;
+        4:   17:    strcpy(button->label, label);
+        4:   18:    button_unselect(button);
+        4:   18-block  0
+call    0 returned 4
+        4:   19:}
+        -:   20:
+function button_select called 58 returned 100% blocks executed 67%
+       58:   21:void button_select(Button *button){
+      58*:   22:    assert(button);
+       58:   22-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 58
+    %%%%%:   22-block  1
+call    2 never executed
+       58:   23:    button->selected = 1;
+       58:   24:}
+        -:   25:
+function button_unselect called 510 returned 100% blocks executed 67%
+      510:   26:void button_unselect(Button *button){
+     510*:   27:    assert(button);
+      510:   27-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 510
+    %%%%%:   27-block  1
+call    2 never executed
+      510:   28:    button->selected = 0;
+      510:   29:}
+        -:   30:
+function button_is_selected called 510 returned 100% blocks executed 75%
+      510:   31:int button_is_selected(const Button *button){
+     510*:   32:    assert(button);
+      510:   32-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 510
+    %%%%%:   32-block  1
+call    2 never executed
+      510:   33:    return button->selected;
+      510:   33-block  0
+        -:   34:}
+        -:   35:
+function button_unselect_all called 253 returned 100% blocks executed 86%
+      253:   36:void button_unselect_all(Button *buttons, int n){
+     253*:   37:    assert(buttons);
+      253:   37-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 253
+    %%%%%:   37-block  1
+call    2 never executed
+        -:   38:    int i;
+      759:   39:    for(i = 0; i < n; i++)
+      253:   39-block  0
+      759:   39-block  1
+branch  0 taken 506
+branch  1 taken 253 (fallthrough)
+      506:   40:        button_unselect(buttons + i);
+      506:   40-block  0
+call    0 returned 506
+      253:   41:}

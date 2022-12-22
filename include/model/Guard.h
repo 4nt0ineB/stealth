@@ -25,7 +25,7 @@ typedef struct {
     Direction direction; /*<! Need to store the direction to detect a change of direction */
     double speed;
     Position position; /*<!  The coordinates where the entity is (not the cell index it is on)  */
-    double panic_count; /* to count panick mode time passed */
+    double panic_count; /*<! To count the time he has been in panic mode */
 } Guard;
 
 /**

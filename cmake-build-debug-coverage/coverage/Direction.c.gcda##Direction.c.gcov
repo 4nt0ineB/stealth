@@ -1,0 +1,42 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/model/Direction.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Direction.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Direction.c.gcda
+        -:    0:Runs:1
+        -:    1:#include "model/Direction.h"
+        -:    2:#include "core/Util.h"
+        -:    3:
+        -:    4:const double direction_factor[9][2] = {
+        -:    5:        {0, 0},
+        -:    6:        {0, -1},
+        -:    7:        {SQRT2 / 2, -(SQRT2 / 2)},
+        -:    8:        {1, 0},
+        -:    9:        { SQRT2 / 2, SQRT2 / 2},
+        -:   10:        {0, 1},
+        -:   11:        { -(SQRT2 / 2), SQRT2 / 2},
+        -:   12:        {-1, 0},
+        -:   13:        {-(SQRT2 / 2), -(SQRT2 / 2)},
+        -:   14:};
+        -:   15:
+function direction_previous called 1116 returned 100% blocks executed 100%
+     1116:   16:Direction direction_previous(Direction direction){
+     1116:   17:    if(direction == STILL) return STILL;
+     1116:   17-block  0
+branch  0 taken 62 (fallthrough)
+branch  1 taken 1054
+       62:   17-block  1
+     1054:   18:    return modulo((int) direction - 2, 8) + 1;
+     1054:   18-block  0
+call    0 returned 1054
+        -:   19:}
+        -:   20:
+function direction_next called 497 returned 100% blocks executed 100%
+      497:   21:Direction direction_next(Direction direction){
+      497:   22:    if(direction == STILL) return STILL;
+      497:   22-block  0
+branch  0 taken 62 (fallthrough)
+branch  1 taken 435
+       62:   22-block  1
+      435:   23:    return modulo((int) direction + 2, 8) - 1;
+      435:   23-block  0
+call    0 returned 435
+        -:   24:}

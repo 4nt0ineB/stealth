@@ -1,0 +1,4 @@
+/home/antoine/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/222.4167.35/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/antoine/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/222.4167.35/bin/ninja/linux/ninja -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage -G Ninja -S /home/antoine/Documents/Developpement/c/stealth -B /home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage

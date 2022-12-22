@@ -202,7 +202,6 @@ void controller_save_score(View *view, GameData *data){
             view_ask_string(view, "Name: ", NAME_LENGTH, data->score.name);
             /* put in mana score board */
             if(in_top_mana){
-                printf("boy");
                 scores_mana[SCORE_SAVED] = data->score;
                 qsort(scores_mana, SCORE_SAVED + 1, sizeof(Score), score_cmp_mana);
                 score_write("resources/score_mana",

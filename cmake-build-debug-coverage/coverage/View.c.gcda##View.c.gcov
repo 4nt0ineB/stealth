@@ -1,0 +1,1053 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/view/View.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/view/View.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/view/View.c.gcda
+        -:    0:Runs:1
+        -:    1:/*
+        -:    2: *   This file is part of Stealth game
+        -:    3: *    Yann ROUX--DAUGROIS
+        -:    4: *   and Antoine Bastos
+        -:    5: *   SPDX-License-Identifier: Apache-2.0
+        -:    6: */
+        -:    7:
+        -:    8:#include "view/View.h"
+        -:    9:#include "core/Settings.h"
+        -:   10:#include "core/Util.h"
+        -:   11:#include "Controller.h"
+        -:   12:
+        -:   13:
+        -:   14:#include <assert.h>
+        -:   15:#include <math.h>
+        -:   16:
+        -:   17:static void view_get_absolute_position(View *view, const Position *position, Position *result);
+        -:   18:static void view_draw_player_skills_info(const View *view, const Player *player);
+        -:   19:static void view_draw_mana_bar(View *view, const GameData *data);
+        -:   20:static void view_draw_stolen_relics(View *view, int n);
+        -:   21:
+        -:   22:
+function view_to_fullscreen called 1 returned 100% blocks executed 100%
+        1:   23:void view_to_fullscreen(View *view){
+        1:   24:    view_update_size(view, MLV_get_desktop_width(), MLV_get_desktop_height());
+        1:   24-block  0
+call    0 returned 1
+call    1 returned 1
+call    2 returned 1
+        1:   25:    MLV_enable_full_screen();
+call    0 returned 1
+        1:   26:    view->fullscreen = 1;
+        1:   27:}
+        -:   28:
+function view_to_windowed called 0 returned 0% blocks executed 0%
+    #####:   29:void view_to_windowed(View *view){
+    #####:   30:    MLV_disable_full_screen();
+    %%%%%:   30-block  0
+call    0 never executed
+    #####:   31:    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+call    0 never executed
+    #####:   32:                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+call    0 never executed
+call    1 never executed
+    #####:   33:    view->fullscreen = 0;
+    #####:   34:}
+        -:   35:
+function view_is_fullscreen called 1 returned 100% blocks executed 100%
+        1:   36:int view_is_fullscreen(View *view){
+        1:   37:    return view->fullscreen;
+        1:   37-block  0
+        -:   38:}
+        -:   39:
+function view_init_images called 1 returned 100% blocks executed 100%
+        1:   40:static void view_init_images(View *view){
+        1:   41:    MLV_Image *tmp = MLV_load_image("resources/img/sheet.png");
+        1:   41-block  0
+call    0 returned 1
+        1:   42:    view->images[IMAGE_WALL] =
+        1:   43:            MLV_copy_partial_image(tmp, 256, 32, 8, 8);
+call    0 returned 1
+        1:   44:    view->images[IMAGE_EMPTY] =
+        1:   45:            MLV_copy_partial_image(tmp, 110, 240, 9, 9);
+call    0 returned 1
+        1:   46:    view->images[IMAGE_RELIC] =
+        1:   47:            MLV_copy_partial_image(tmp, 144, 160, 8, 8);
+call    0 returned 1
+        1:   48:    MLV_free_image(tmp);
+call    0 returned 1
+        1:   49:    tmp = MLV_load_image("resources/img/bg.png");
+call    0 returned 1
+        1:   50:    int imgw = MLV_get_image_width(tmp);
+call    0 returned 1
+        1:   51:    int imgh = MLV_get_image_height(tmp);
+call    0 returned 1
+        1:   52:    view->images[IMAGE_BG] = MLV_copy_partial_image(tmp, 0, 0, imgw / 3, imgh);
+call    0 returned 1
+        1:   53:    MLV_resize_image(view->images[IMAGE_BG], 1920, 1080);
+call    0 returned 1
+        1:   54:    MLV_free_image(tmp);
+call    0 returned 1
+        1:   55:}
+        -:   56:
+function view_init called 1 returned 100% blocks executed 100%
+        1:   57:void view_init(View *view){
+        1:   58:    rectangle_init(&view->info_area, 0, 0, 0, 0);
+        1:   58-block  0
+call    0 returned 1
+        1:   59:    view->available_area = view->game_area = view->info_area;
+        1:   60:    view->side = 0;
+        1:   61:    view->font_text = NULL;
+        1:   62:    view->bg_color = MLV_COLOR_BLACK;
+call    0 returned 1
+        1:   63:    MLV_create_window("Stealth", "", 1, 1);
+call    0 returned 1
+        1:   64:    view->fullscreen = 0;
+        -:   65:    /* Default frame rate */
+        1:   66:    MLV_change_frame_rate( FPS );
+call    0 returned 1
+        -:   67:    /* Set window dimension to default values */
+        1:   68:    view_update_size(view, (MLV_get_desktop_width() * DEFAULT_WIN_W_PERCENT) / 100,
+call    0 returned 1
+        1:   69:                     (MLV_get_desktop_height() * DEFAULT_WIN_H_PERCENT) / 100);
+call    0 returned 1
+call    1 returned 1
+        1:   70:    view_init_images(view);
+call    0 returned 1
+        1:   71:}
+        -:   72:
+function view_update_size called 2 returned 100% blocks executed 94%
+        2:   73:void view_update_size(View *view, int w, int h){
+       2*:   74:    assert(w > 0 && h > 0);
+        2:   74-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:   74-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+    %%%%%:   74-block  2
+call    4 never executed
+        -:   75:    /* Update font */
+        2:   76:    if(view->font_text) MLV_free_font(view->font_text);
+        2:   76-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:   76-block  1
+call    2 returned 1
+        2:   77:    if(view->font_title) MLV_free_font(view->font_title);
+        2:   77-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:   77-block  1
+call    2 returned 1
+        2:   78:    view->font_text = MLV_load_font(
+        2:   78-block  0
+call    0 returned 2
+        -:   79:            RESOURCE("fonts/militech.ttf")
+        -:   80:            , (w * FONT_HEIGHT_PERCENT) / 100);
+        2:   81:    view->font_title = MLV_load_font(
+call    0 returned 2
+        -:   82:            RESOURCE("fonts/militech.ttf")
+        -:   83:            , (w * FONT_HEIGHT_PERCENT * 2) / 100);
+        -:   84:    /* Info area */
+        2:   85:    view->info_area.w = (w * DEFAULT_INFO_W_PERCENT) / 100;
+        2:   86:    view->info_area.h = (h * DEFAULT_INFO_H_PERCENT) / 100;
+        -:   87:    /* Available area, for the calculation of the game area dimensions  */
+        2:   88:    view->available_area.origin.y = view->info_area.h;
+        2:   89:    view->available_area.w = w;
+        2:   90:    view->available_area.h = h - view->info_area.h;
+        -:   91:    /* Compute view->side from the new available area dimensions  */
+        4:   92:    view->side = greatest_common_multiplier_less_than(
+        -:   93:            ROOM_WIDTH,
+        -:   94:            ROOM_HEIGHT,
+        2:   95:            MIN(view->available_area.w, view->available_area.h));
+call    0 returned 2
+        2:   96:    view->side = view->side / MIN(ROOM_WIDTH, ROOM_HEIGHT);
+        -:   97:    /* Game area */
+        2:   98:    view->game_area.w = view->side * ROOM_WIDTH;
+        2:   99:    view->game_area.h = view->side * ROOM_HEIGHT;
+        -:  100:    /* Center the game area in the available area */
+        2:  101:    view->game_area.origin.x = view->available_area.origin.x
+        2:  102:                               + (view->available_area.w - view->game_area.w) / 2;
+        2:  103:    view->game_area.origin.y = view->available_area.origin.y
+        2:  104:                               + (view->available_area.h - view->game_area.h) / 2;
+        2:  105:    MLV_change_window_size(w, h);
+call    0 returned 2
+        2:  106:    view->width = MLV_get_window_width();
+call    0 returned 2
+        2:  107:    view->height = MLV_get_window_height();
+call    0 returned 2
+        2:  108:    if(view->images[IMAGE_BG])
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  109:        MLV_resize_image(view->images[IMAGE_BG], view->width, view->height);
+        1:  109-block  0
+call    0 returned 1
+        2:  110:}
+        -:  111:
+function view_draw_menu called 253 returned 100% blocks executed 100%
+      253:  112:void view_draw_menu(View *view, const Button *buttons, int n){
+        -:  113:    int i;
+        -:  114:    int txtbw, txtbh;
+      253:  115:    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+      253:  115-block  0
+call    0 returned 253
+      253:  116:    MLV_Color color = MLV_rgba(84, 174, 179, 0);
+call    0 returned 253
+        -:  117:    /* bg */
+        -:  118:    /*MLV_draw_filled_rectangle(0, 0, view->width, view->height, bgcolor);*/
+      253:  119:    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
+call    0 returned 253
+        -:  120:    /* title */
+      253:  121:    MLV_get_size_of_adapted_text_box_with_font("Stealth", view->font_title, 5, &txtbw, &txtbh);
+call    0 returned 253
+      253:  122:    MLV_draw_adapted_text_box_with_font(view->width / 2 - txtbw / 2, view->height * 0.25,
+      253:  123:                                        "Stealth", view->font_title, 5,
+call    0 returned 253
+        -:  124:                                        bgcolor, color, bgcolor,
+        -:  125:                                        MLV_TEXT_CENTER);
+        -:  126:    /* buttons */
+      759:  127:    for(i = 0; i < n; i++) view_draw_button(view, &buttons[i]);
+      506:  127-block  0
+call    0 returned 506
+      759:  127-block  1
+branch  1 taken 506
+branch  2 taken 253 (fallthrough)
+      253:  128:}
+        -:  129:
+function view_draw_info called 2108 returned 100% blocks executed 100%
+     2108:  130:void view_draw_info(View *view, const GameData *data){
+        -:  131:    static char buffer[40] = {0};
+     2108:  132:    draw_rectangle(view, &view->info_area, 0);
+     2108:  132-block  0
+call    0 returned 2108
+        -:  133:    /* * * * * * * * *
+        -:  134:     * Draw timer *
+        -:  135:     * * * * * * * * */
+     2108:  136:    timer_sprintf(data->timer, buffer);
+call    0 returned 2108
+        -:  137:
+     2108:  138:    MLV_draw_text_with_font(
+call    0 returned 2108
+     2108:  139:            view->info_area.w / 2 - 50
+     2108:  140:            , view->info_area.origin.y + view->info_area.h / 3
+        -:  141:            , buffer
+     2108:  142:            , view->font_text
+call    0 returned 2108
+        -:  143:            ,MLV_COLOR_DARK_GREY);
+        -:  144:    /* mana / relics / skills */
+     2108:  145:    view_draw_mana_bar(view, data);
+call    0 returned 2108
+     2108:  146:    view_draw_stolen_relics(view, controller_stolen_relic_count(data));
+call    0 returned 2108
+call    1 returned 2108
+     2108:  147:    view_draw_player_skills_info(view, &data->player);
+call    0 returned 2108
+     2108:  148:}
+        -:  149:
+function view_draw_util called 0 returned 0% blocks executed 0%
+    #####:  150:void view_draw_util(View *view){
+        -:  151:    static char buffer[10] = {0};
+        -:  152:    /* draw framerate */
+        -:  153:    /* draw_rectangle(view, &view->available_area, view->bg_color); */
+    #####:  154:    sprintf(buffer, "%d fps", MLV_get_frame_rate());
+    %%%%%:  154-block  0
+call    0 never executed
+    #####:  155:    MLV_draw_text_with_font(view->available_area.w - view->available_area.w / 10
+call    0 never executed
+    #####:  156:            , view->available_area.h - view->available_area.h / 10
+        -:  157:            , buffer
+    #####:  158:            , view->font_text
+call    0 never executed
+        -:  159:            ,MLV_COLOR_ORANGE);
+    #####:  160:}
+        -:  161:
+function view_draw_player called 2108 returned 100% blocks executed 85%
+     2108:  162:void view_draw_player(View *view, const Player *player){
+        -:  163:    Position pos;
+     2108:  164:    MLV_Color color = MLV_rgba(0, 99, 80, 255);
+     2108:  164-block  0
+call    0 returned 2108
+        -:  165:    unsigned char r,g,b,a;
+     2108:  166:    view_get_absolute_position(view, &player->position, &pos);
+call    0 returned 2108
+     2108:  167:    if(skill_is_activated(player_skill(player, SPEED))){
+call    0 returned 2108
+call    1 returned 2108
+branch  2 taken 53 (fallthrough)
+branch  3 taken 2055
+       53:  168:        color = MLV_rgba(0, 231, 211,  255);
+       53:  168-block  0
+call    0 returned 53
+        -:  169:    }
+     2108:  170:    if(skill_is_activated(player_skill(player, INVISIBILITY))){
+     2108:  170-block  0
+call    0 returned 2108
+call    1 returned 2108
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2108
+    #####:  171:        MLV_convert_color_to_rgba(color, &r, &g, &b, &a);
+    %%%%%:  171-block  0
+call    0 never executed
+    #####:  172:        color = MLV_rgba(r, g, b, 127);
+call    0 never executed
+        -:  173:    }
+     2108:  174:    MLV_draw_filled_circle(pos.x, pos.y, view->side / 2, color);
+     2108:  174-block  0
+call    0 returned 2108
+     2108:  175:}
+        -:  176:
+function view_draw_relic called 6324 returned 100% blocks executed 100%
+     6324:  177:void view_draw_relic(View *view, const Relic *relic){
+        -:  178:    Position pos;
+     6324:  179:    MLV_Color color = relic_is_stolen(relic) ? MLV_rgba(0, 0, 0, 255) : MLV_COLOR_GREEN3;
+     6324:  179-block  0
+call    0 returned 6324
+branch  1 taken 4131 (fallthrough)
+branch  2 taken 2193
+     4131:  179-block  1
+call    3 returned 4131
+     2193:  179-block  2
+call    4 returned 2193
+     6324:  180:    view_get_absolute_position(view, &relic->position, &pos);
+     6324:  180-block  0
+call    0 returned 6324
+     6324:  181:    MLV_draw_filled_rectangle(pos.x, pos.y, view->side, view->side, color);
+call    0 returned 6324
+     6324:  182:    MLV_draw_rectangle(
+call    0 returned 6324
+     6324:  183:            pos.x
+     6324:  184:            , pos.y
+call    0 returned 6324
+        -:  185:            , view->side
+        -:  186:            , view->side
+        -:  187:            , MLV_rgba(224, 224, 0, 255)
+        -:  188:    );
+     6324:  189:    if(!relic_is_stolen(relic) && view->images[IMAGE_RELIC]){
+call    0 returned 6324
+branch  1 taken 2193 (fallthrough)
+branch  2 taken 4131
+     2193:  189-block  0
+branch  3 taken 2193 (fallthrough)
+branch  4 taken 0
+     2193:  190:        MLV_resize_image_with_proportions(view->images[IMAGE_RELIC], view->side, view->side);
+     2193:  190-block  0
+call    0 returned 2193
+     2193:  191:        MLV_draw_image(view->images[IMAGE_RELIC], pos.x, pos.y);
+call    0 returned 2193
+        -:  192:    }
+     6324:  193:}
+        -:  194:
+function view_draw_guard called 10540 returned 100% blocks executed 100%
+    10540:  195:void view_draw_guard(View *view, const Guard *guard){
+        -:  196:    Position pos;
+        -:  197:    MLV_Color color;
+    10540:  198:    color = MLV_rgba(164, 26, 94, 255);
+    10540:  198-block  0
+call    0 returned 10540
+    10540:  199:    if(guard->panic_mode) color = MLV_rgba(255, 75, 250, 255);
+branch  0 taken 6050 (fallthrough)
+branch  1 taken 4490
+     6050:  199-block  0
+call    2 returned 6050
+    10540:  200:    view_get_absolute_position(view, &guard->position, &pos);
+    10540:  200-block  0
+call    0 returned 10540
+    10540:  201:    MLV_draw_filled_circle(
+    10540:  202:            pos.x
+    10540:  203:            , pos.y
+    10540:  204:            , view->side / 2
+call    0 returned 10540
+        -:  205:            , color);
+        -:  206:
+    10540:  207:    MLV_draw_circle(
+    10540:  208:            pos.x
+    10540:  209:            , pos.y
+    10540:  210:            , view->side * guard_view_range(guard) /* @Todo: to change. The guard must have a vision range */
+call    0 returned 10540
+call    1 returned 10540
+        -:  211:            , color);
+    10540:  212:}
+        -:  213:
+function view_draw_relics called 2108 returned 100% blocks executed 100%
+     2108:  214:void view_draw_relics(View *view, const Relic *relics){
+        -:  215:    int i;
+     8432:  216:    for(i = 0; i < RELICS_NUMBER; i++) view_draw_relic(view, &relics[i]);
+     2108:  216-block  0
+     6324:  216-block  1
+call    0 returned 6324
+     8432:  216-block  2
+branch  1 taken 6324
+branch  2 taken 2108 (fallthrough)
+     2108:  217:}
+        -:  218:
+function view_draw_guards called 2108 returned 100% blocks executed 100%
+     2108:  219:void view_draw_guards(View *view, const GameData *data){
+        -:  220:    double alpha;
+        -:  221:    int i;
+        -:  222:    /* Guards */
+    12648:  223:    for(i = 0; i < GUARD_NUMBER; i++)
+     2108:  223-block  0
+    12648:  223-block  1
+branch  0 taken 10540
+branch  1 taken 2108 (fallthrough)
+    10540:  224:        view_draw_guard(view, &data->guards[i]);
+    10540:  224-block  0
+call    0 returned 10540
+        -:  225:    /* show panic mode with red filter */
+     2108:  226:    if(guard_is_panicking(&data->guards[0])){
+     2108:  226-block  0
+call    0 returned 2108
+branch  1 taken 1210 (fallthrough)
+branch  2 taken 898
+        -:  227:        /* We use the clock as a way of modulate the aplha
+        -:  228:         * of the filter */
+        -:  229:        /* cos^2  ->  [0, 1] */
+     1210:  230:        alpha = cos(data->timer->end.tv_sec);
+     1210:  231:        alpha = alpha * alpha * 70;
+     1210:  232:        MLV_draw_filled_rectangle(0, 0, view->width, view->height,
+     1210:  232-block  0
+call    0 returned 1210
+call    1 returned 1210
+        -:  233:                                  MLV_rgba(255,0,0, alpha));
+        -:  234:    }
+     2108:  235:}
+        -:  236:
+function view_draw_room called 2108 returned 100% blocks executed 100%
+     2108:  237:void view_draw_room(View *view, const Room *room){
+        -:  238:    /*
+        -:  239:     * The absolute position of any object of the room to be drawn
+        -:  240:     * is determined in the view !
+        -:  241:     */
+        -:  242:    Position pos;
+        -:  243:    MLV_Color color;
+        -:  244:
+        -:  245:    int i, j;
+        -:  246:    /* The Background */
+     2108:  247:    draw_rectangle(view, &view->game_area, MLV_rgba(61, 72, 91,255));
+     2108:  247-block  0
+call    0 returned 2108
+call    1 returned 2108
+     2108:  248:    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
+call    0 returned 2108
+        -:  249:
+        -:  250:    /* The Grid */
+     2108:  251:    char thickness = 1;
+        -:  252:    /* Draw the lines */
+    96968:  253:    for(i = 0; i < ROOM_HEIGHT; i++){
+    96968:  253-block  0
+branch  0 taken 94860
+branch  1 taken 2108 (fallthrough)
+    94860:  254:        pos.x = 0;
+    94860:  255:        pos.y = i;
+    94860:  256:        view_get_absolute_position(view, &pos, &pos);
+    94860:  256-block  0
+call    0 returned 94860
+    94860:  257:        MLV_draw_filled_rectangle(
+call    0 returned 94860
+    94860:  258:                pos.x
+    94860:  259:                , pos.y
+call    0 returned 94860
+        -:  260:                , view->game_area.w
+        -:  261:                , thickness
+        -:  262:                , MLV_COLOR_BLACK);
+        -:  263:    }
+        -:  264:    /* Draw the columns */
+   128588:  265:    for(j = 0; j < ROOM_WIDTH; j++){
+     2108:  265-block  0
+   128588:  265-block  1
+branch  0 taken 126480
+branch  1 taken 2108 (fallthrough)
+   126480:  266:        pos.x = j;
+   126480:  267:        pos.y = 0;
+   126480:  268:        view_get_absolute_position(view, &pos, &pos);
+   126480:  268-block  0
+call    0 returned 126480
+   126480:  269:        MLV_draw_filled_rectangle(
+call    0 returned 126480
+   126480:  270:                pos.x
+   126480:  271:                , pos.y
+call    0 returned 126480
+        -:  272:                , thickness
+        -:  273:                , view->game_area.h
+        -:  274:                , MLV_COLOR_BLACK);
+        -:  275:    }
+        -:  276:
+        -:  277:    /* Draw the tiles : to delegate */
+        -:  278:    MLV_Image *img_tile;
+    96968:  279:    for(i = 0; i < ROOM_HEIGHT; i++){
+     2108:  279-block  0
+    94860:  279-block  1
+    96968:  279-block  2
+branch  0 taken 94860
+branch  1 taken 2108 (fallthrough)
+  5786460:  280:        for(j = 0; j < ROOM_WIDTH; j++){
+    94860:  280-block  0
+  5691600:  280-block  1
+  5786460:  280-block  2
+branch  0 taken 5691600
+branch  1 taken 94860 (fallthrough)
+  5691600:  281:            img_tile = NULL;
+  5691600:  282:            pos.x = j;
+  5691600:  283:            pos.y = i;
+  5691600:  284:            view_get_absolute_position(view, &pos, &pos);
+  5691600:  284-block  0
+call    0 returned 5691600
+        -:  285:            /*if(room_get_tile_type(room, i, j) == EMPTY) continue;*/
+  5691600:  286:            switch (room_get_tile_type(room, i, j)) {
+call    0 returned 5691600
+branch  1 taken 754664
+branch  2 taken 1073849
+branch  3 taken 3856763
+branch  4 taken 6324
+   754664:  287:                case WALL:
+   754664:  288:                    color = MLV_COLOR_BLACK;
+   754664:  288-block  0
+call    0 returned 754664
+   754664:  289:                    img_tile = view->images[IMAGE_WALL];
+   754664:  290:                    break;
+  1073849:  291:                case MANA:
+  1073849:  292:                    color = MLV_rgba(0, 162, 184,120);
+  1073849:  292-block  0
+call    0 returned 1073849
+  1073849:  293:                    img_tile = view->images[IMAGE_EMPTY];
+  1073849:  294:                    break;
+  3856763:  295:                case EMPTY:
+  3856763:  296:                    color = MLV_COLOR_BLACK;
+  3856763:  296-block  0
+call    0 returned 3856763
+  3856763:  297:                    break;
+     6324:  298:                default:
+     6324:  299:                    color = MLV_rgba(0,0,0,0);
+     6324:  299-block  0
+call    0 returned 6324
+        -:  300:            }
+  5691600:  301:            MLV_draw_filled_rectangle(pos.x, pos.y, view->side, view->side, color);
+  5691600:  301-block  0
+call    0 returned 5691600
+  5691600:  302:            if(img_tile){
+branch  0 taken 1828513 (fallthrough)
+branch  1 taken 3863087
+  1828513:  303:                MLV_resize_image_with_proportions(img_tile, view->side, view->side);
+  1828513:  303-block  0
+call    0 returned 1828513
+  1828513:  304:                MLV_draw_image(img_tile, pos.x, pos.y);
+call    0 returned 1828513
+        -:  305:            }
+        -:  306:        }
+        -:  307:    }
+        -:  308:    /* spawn */
+     2108:  309:    pos.x = 1;
+     2108:  310:    pos.y = 1;
+     2108:  311:    int spawn_side = view->side * 2;
+     2108:  312:    view_get_absolute_position(view, &pos, &pos);
+     2108:  312-block  0
+call    0 returned 2108
+     2108:  313:    MLV_draw_filled_rectangle(pos.x, pos.y,
+call    0 returned 2108
+call    1 returned 2108
+        -:  314:                              spawn_side, spawn_side,
+        -:  315:                              MLV_rgba(111, 0, 255, 50));
+     2108:  316:}
+        -:  317:
+function view_free called 1 returned 100% blocks executed 100%
+        1:  318:void view_free(View *view){
+        1:  319:    MLV_free_font(view->font_text);
+        1:  319-block  0
+call    0 returned 1
+        1:  320:    MLV_free_font(view->font_title);
+call    0 returned 1
+        -:  321:    int i;
+        5:  322:    for(i = 0; i < IMAGE_BG + 1; i++)
+        5:  322-block  0
+branch  0 taken 4
+branch  1 taken 1 (fallthrough)
+        4:  323:        MLV_free_image(view->images[i]);
+        4:  323-block  0
+call    0 returned 4
+        1:  324:    MLV_free_window();
+        1:  324-block  0
+call    0 returned 1
+        1:  325:}
+        -:  326:
+function draw_rectangle called 4216 returned 100% blocks executed 100%
+     4216:  327:void draw_rectangle(View *view, const Rectangle *rectangle, const MLV_Color color){
+     4216:  328:    MLV_draw_filled_rectangle(
+     4216:  329:            rectangle->origin.x, rectangle->origin.y
+     4216:  330:            , rectangle->w, rectangle->h, color);
+     4216:  330-block  0
+call    0 returned 4216
+     4216:  331:}
+        -:  332:
+function draw_intersections_with_tiles called 0 returned 0% blocks executed 0%
+    #####:  333:void draw_intersections_with_tiles(View *view, const Room *room, const Position *p1, const Position *p2){
+    #####:  334:    assert(p1 && p2);
+    %%%%%:  334-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  334-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  334-block  2
+call    4 never executed
+        -:  335:    /* draw line between positions */
+        -:  336:    Position abs_pos1, abs_pos2;
+    #####:  337:    view_get_absolute_position(view, p1, &abs_pos1);
+    %%%%%:  337-block  0
+call    0 never executed
+    #####:  338:    view_get_absolute_position(view, p2, &abs_pos2);
+call    0 never executed
+    #####:  339:    MLV_draw_line(abs_pos1.x,abs_pos1.y,
+call    0 never executed
+    #####:  340:                  abs_pos2.x,abs_pos2.y,MLV_COLOR_BLACK);
+call    0 never executed
+        -:  341:
+        -:  342:    /* draw intersections */
+        -:  343:    int i;
+        -:  344:    double xa;
+        -:  345:    Position pos_a, tmp;
+        -:  346:
+    #####:  347:    for(i = 0; i < ROOM_HEIGHT; i++){
+    %%%%%:  347-block  0
+    %%%%%:  347-block  1
+branch  0 never executed
+branch  1 never executed
+    #####:  348:        xa = (i - p1->y) / (p2->y - p1->y);
+    #####:  349:        if(xa >= 0 && xa <= 1){ /* check if on segment */
+    %%%%%:  349-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  349-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  350:            pos_a.y = i;
+    #####:  351:            position_interpolate_with_x(p1, p2, &pos_a);
+    %%%%%:  351-block  0
+call    0 never executed
+    #####:  352:            tmp.x = (int) pos_a.x;
+    #####:  353:            tmp.y = (int) pos_a.y;
+        -:  354:            /* enhance if wall */
+    #####:  355:            if(room_get_tile_type(room, tmp.y, tmp.x) == WALL) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  356:                view_get_absolute_position(view, &tmp, &tmp);
+    %%%%%:  356-block  0
+call    0 never executed
+    #####:  357:                MLV_draw_filled_rectangle(
+call    0 never executed
+    #####:  358:                        tmp.x,
+    #####:  359:                        tmp.y,
+call    0 never executed
+        -:  360:                        view->side, view->side,
+        -:  361:                        MLV_COLOR_RED
+        -:  362:                );
+        -:  363:            }
+    #####:  364:            view_get_absolute_position(view, &pos_a, &pos_a);
+    %%%%%:  364-block  0
+call    0 never executed
+    #####:  365:            MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_GREEN);
+call    0 never executed
+call    1 never executed
+        -:  366:        }
+        -:  367:    }
+        -:  368:
+    #####:  369:    for(i = 0; i < ROOM_WIDTH; i++){
+    %%%%%:  369-block  0
+    %%%%%:  369-block  1
+    %%%%%:  369-block  2
+branch  0 never executed
+branch  1 never executed
+    #####:  370:        xa = (i - p1->x) / (p2->x - p1->x);
+    #####:  371:        if(xa >= 0 && xa <= 1){ /* check if on segment */
+    %%%%%:  371-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  371-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  372:            pos_a.x = i;
+    #####:  373:            position_interpolate_with_y(p1, p2, &pos_a);
+    %%%%%:  373-block  0
+call    0 never executed
+    #####:  374:            tmp.x = (int) pos_a.x;
+    #####:  375:            tmp.y = (int) pos_a.y;
+        -:  376:            /* enhance if wall */
+    #####:  377:            if(room_get_tile_type(room, tmp.y, tmp.x) == WALL) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  378:                view_get_absolute_position(view, &tmp, &tmp);
+    %%%%%:  378-block  0
+call    0 never executed
+    #####:  379:                MLV_draw_filled_rectangle(
+call    0 never executed
+    #####:  380:                        tmp.x,
+    #####:  381:                        tmp.y,
+call    0 never executed
+        -:  382:                        view->side, view->side,
+        -:  383:                        MLV_COLOR_RED
+        -:  384:                );
+        -:  385:            }
+    #####:  386:            view_get_absolute_position(view, &pos_a, &pos_a);
+    %%%%%:  386-block  0
+call    0 never executed
+    #####:  387:            MLV_draw_filled_circle(pos_a.x,pos_a.y,3,MLV_COLOR_ORANGE);
+call    0 never executed
+call    1 never executed
+        -:  388:        }
+        -:  389:    }
+    #####:  390:}
+        -:  391:
+function view_ask_string called 1 returned 100% blocks executed 88%
+        1:  392:void view_ask_string(View *view, const char *title, int len, char *dest){
+        -:  393:    char *input;
+        -:  394:    size_t inputlen;
+        1:  395:    int boxw = (int) view->available_area.w / 5;
+        1:  396:    int boxh = (int) view->available_area.h / 5;
+        1:  397:    int boxx = (view->available_area.w / 2) - (boxw / 2);
+        1:  398:    int boxy = (view->available_area.h / 2) - (boxh / 2);
+        1:  399:    MLV_Color color = MLV_rgba(88, 174, 184, 255);
+        1:  399-block  0
+call    0 returned 1
+        1:  400:    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 200);
+call    0 returned 1
+        1:  401:    MLV_wait_input_box(
+call    0 returned 1
+        -:  402:            boxx
+        -:  403:            , boxy
+        -:  404:            , boxw
+        -:  405:            , boxh
+        -:  406:            , bgcolor
+        -:  407:            , color
+        -:  408:            , bgcolor
+        -:  409:            , title
+        -:  410:            , &input
+        -:  411:            );
+        1:  412:    inputlen = strlen(input);
+        1:  413:    memccpy(dest, input, -1, MIN(inputlen, len - 1));
+call    0 returned 1
+       1*:  414:    dest[MIN(inputlen, len - 1) + 1] = '\0';
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  414-block  0
+    %%%%%:  414-block  1
+        1:  415:    free(input);
+        1:  416:}
+        -:  417:
+function view_draw_score_board_impl called 2442 returned 100% blocks executed 100%
+     2442:  418:void view_draw_score_board_impl(const View *view,
+        -:  419:                                int x,
+        -:  420:                                int y,
+        -:  421:                                const char *title,
+        -:  422:                                const Score *scores,
+        -:  423:                                int n,
+        -:  424:                                void (*score_to_string)(const Score *score, char *buff)){
+        -:  425:    static char buffer[800];
+     2442:  426:    buffer[0] = '\0';
+        -:  427:    int i;
+        -:  428:    /* time */
+     2442:  429:    char tmpbuff[100] = {0};
+    17056:  430:    for(i = 0; i < n; i++){
+     2442:  430-block  0
+    17056:  430-block  1
+branch  0 taken 14614
+branch  1 taken 2442 (fallthrough)
+    14614:  431:        sprintf(tmpbuff, "%-20s", scores[i].name);
+    14614:  432:        strcat(buffer, tmpbuff);
+    14614:  433:        score_to_string(&scores[i], tmpbuff);
+    14614:  433-block  0
+call    0 returned 14614
+    14614:  434:        strcat(buffer, tmpbuff);
+    14614:  435:        strcat(buffer, "\n");
+        -:  436:    }
+        -:  437:    int txtbw, txtbh;
+     2442:  438:    MLV_Color color = MLV_rgba(88, 174, 184, 255);
+     2442:  438-block  0
+call    0 returned 2442
+     2442:  439:    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+call    0 returned 2442
+     2442:  440:    MLV_get_size_of_adapted_text_box(buffer, 5, &txtbw, &txtbh);
+call    0 returned 2442
+     2442:  441:    MLV_draw_adapted_text_box(x - txtbw / 2, y,
+call    0 returned 2442
+        -:  442:                                        buffer, 5,
+        -:  443:                                        bgcolor, color, bgcolor
+        -:  444:            , MLV_TEXT_RIGHT);
+        -:  445:    int txtw, txth;
+     2442:  446:    MLV_get_size_of_text_with_font(title, &txtw, &txth, view->font_text);
+call    0 returned 2442
+     2442:  447:    MLV_draw_text_with_font(x - txtw / 2, y - txth * 2, title, view->font_text, color);
+call    0 returned 2442
+     2442:  448:}
+        -:  449:
+function view_draw_end_msg called 1221 returned 100% blocks executed 100%
+     1221:  450:void view_draw_end_msg(const View *view, const GameData *data, int win) {
+        -:  451:    /* Draw score recap */
+        -:  452:    static char buffer[100];
+        -:  453:    MLV_Font *font;
+     1221:  454:    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+     1221:  454-block  0
+call    0 returned 1221
+        -:  455:    /*MLV_draw_filled_rectangle(0, 0, view->width, view->height, bgcolor);*/
+     1221:  456:    MLV_draw_image(view->images[IMAGE_BG], 0, 0);
+call    0 returned 1221
+        -:  457:
+        -:  458:    /* compute proper text */
+     1221:  459:    if (win) {
+branch  0 taken 1203 (fallthrough)
+branch  1 taken 18
+     1203:  460:        sprintf(buffer, "Room accomplished in ");
+     1203:  461:        timer_sprintf(data->timer, buffer + 21);
+     1203:  461-block  0
+call    0 returned 1203
+     1203:  462:        sprintf(buffer + strlen(buffer), "\n%d mana consumed\npress r to retry", data->score.mana);
+     1203:  463:        font = view->font_text;
+        -:  464:    } else {
+       18:  465:        sprintf(buffer, "You have failed\npress r to retry");
+       18:  466:        font = view->font_title;
+       18:  466-block  0
+        -:  467:    }
+        -:  468:
+        -:  469:    /* Display text */
+        -:  470:    int txtbw, txtbh;
+     1221:  471:    MLV_Color color = MLV_rgba(212, 152, 42, 255);
+     1221:  471-block  0
+call    0 returned 1221
+     1221:  472:    MLV_get_size_of_adapted_text_box_with_font(buffer, font, 5, &txtbw, &txtbh);
+call    0 returned 1221
+     1221:  473:    MLV_draw_adapted_text_box_with_font(view->width / 2 - txtbw / 2, view->height * 0.10,
+call    0 returned 1221
+        -:  474:                                        buffer, font, 5,
+        -:  475:                                        bgcolor, color, bgcolor, MLV_TEXT_CENTER);
+     1221:  476:}
+        -:  477:
+function view_draw_score_board called 1221 returned 100% blocks executed 100%
+     1221:  478:void view_draw_score_board(const View *view,
+        -:  479:                           const GameData *data,
+        -:  480:                           const Score *scores_mana,
+        -:  481:                           int nmana,
+        -:  482:                           const Score *scores_time,
+        -:  483:                           int ntime){
+        -:  484:    /* time */
+     1221:  485:    view_draw_score_board_impl(view, view->width / 4, view->height / 3,
+     1221:  485-block  0
+call    0 returned 1221
+        -:  486:                               "Best times",
+        -:  487:                               scores_time, ntime, score_sprintf_time);
+        -:  488:    /* mana */
+     1221:  489:    view_draw_score_board_impl(view, view->width - view->width / 4, view->height / 3,
+call    0 returned 1221
+        -:  490:                               "Best mana consumption",
+        -:  491:                               scores_mana, nmana, score_sprintf_mana);
+     1221:  492:}
+        -:  493:
+function view_get_button_size called 974 returned 100% blocks executed 100%
+      974:  494:void view_get_button_size(const View *view, const Button *button, int *width, int *height){
+        -:  495:    int boxw, boxh;
+      974:  496:    MLV_get_size_of_adapted_text_box_with_font(
+      974:  497:            button->label
+      974:  498:            , view->font_text
+      974:  498-block  0
+call    0 returned 974
+        -:  499:            , 5
+        -:  500:            , &boxw
+        -:  501:            , &boxh
+        -:  502:    );
+      974:  503:    if(width) *width = boxw;
+branch  0 taken 974 (fallthrough)
+branch  1 taken 0
+      974:  503-block  0
+      974:  504:    if(height) *height = boxh;
+      974:  504-block  0
+branch  0 taken 974 (fallthrough)
+branch  1 taken 0
+      974:  504-block  1
+      974:  505:}
+        -:  506:
+function view_draw_button called 506 returned 100% blocks executed 100%
+      506:  507:void view_draw_button(const View *view, const Button *button){
+      506:  508:    MLV_Color bgcolor = MLV_rgba(29, 33, 54, 0);
+      506:  508-block  0
+call    0 returned 506
+      506:  509:    MLV_Color textcolor = MLV_rgba(212, 152, 42, 255);
+call    0 returned 506
+      506:  510:    MLV_Color bordercolor = MLV_rgba(18, 20, 33, 0);
+call    0 returned 506
+        -:  511:    int w, h;
+      506:  512:    view_get_button_size(view, button, &w, &h);
+call    0 returned 506
+      506:  513:    if(button_is_selected(button)){
+call    0 returned 506
+branch  1 taken 58 (fallthrough)
+branch  2 taken 448
+       58:  514:        bgcolor = MLV_rgba(48, 54, 89, 255);
+       58:  514-block  0
+call    0 returned 58
+        -:  515:    }
+      506:  516:    MLV_draw_adapted_text_box_with_font(
+      506:  517:            button->x * view->width - w / 2
+      506:  518:            , button->y * view->height - h / 2
+      506:  519:            , button->label
+      506:  520:            , view->font_text
+      506:  520-block  0
+call    0 returned 506
+        -:  521:            , 5
+        -:  522:            , bordercolor
+        -:  523:            , textcolor
+        -:  524:            , bgcolor
+        -:  525:            , MLV_TEXT_CENTER
+        -:  526:            );
+      506:  527:}
+        -:  528:
+        -:  529:/***********
+        -:  530: *
+        -:  531: * Static
+        -:  532: *
+        -:  533: ***********/
+        -:  534:
+function view_get_absolute_position called 5934020 returned 100% blocks executed 100%
+  5934020:  535:static void view_get_absolute_position(View *view, const Position *position, Position *result){
+  5934020:  536:    result->x = view->game_area.origin.x + position->x * view->side;
+  5934020:  537:    result->y = view->game_area.origin.y + position->y * view->side;
+  5934020:  538:}
+        -:  539:
+function view_draw_player_skills_info called 2108 returned 100% blocks executed 92%
+     2108:  540:static void view_draw_player_skills_info(const View *view, const Player *player){
+        -:  541:    static char buffer[100] = {0};
+     2108:  542:    buffer[0] = '\0';
+        -:  543:    int txtw;
+     2108:  544:    if(skill_is_activated(player_skill(player, INVISIBILITY))){
+     2108:  544-block  0
+call    0 returned 2108
+call    1 returned 2108
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2108
+    #####:  545:        strcat(buffer, "Invisible");
+    %%%%%:  545-block  0
+        -:  546:    }
+     2108:  547:    if(skill_is_activated(player_skill(player, SPEED))){
+     2108:  547-block  0
+call    0 returned 2108
+call    1 returned 2108
+branch  2 taken 53 (fallthrough)
+branch  3 taken 2055
+       53:  548:        strcat(buffer, " Speed");
+       53:  548-block  0
+        -:  549:    }
+     2108:  550:    MLV_get_size_of_text_with_font(buffer, &txtw, NULL, view->font_text);
+     2108:  550-block  0
+call    0 returned 2108
+     2108:  551:    MLV_draw_text_with_font(view->info_area.w - txtw - view->info_area.w * 0.1
+call    0 returned 2108
+     2108:  552:            , view->info_area.h * 0.1
+        -:  553:            , buffer
+     2108:  554:            ,  view->font_text
+call    0 returned 2108
+        -:  555:            , MLV_COLOR_ORANGE);
+     2108:  556:}
+        -:  557:
+function view_draw_stolen_relics called 2108 returned 100% blocks executed 100%
+     2108:  558:static void view_draw_stolen_relics(View *view, int n){
+        -:  559:    static char buffer[40] = {0};
+        -:  560:    /* * * * * * * * * * * *
+        -:  561:     * Draw stolen relics  *
+        -:  562:     * * * * * * * * * * * */
+     2108:  563:    double square_size = view->info_area.h / 2.0;
+     2108:  564:    Rectangle relic = {
+        -:  565:            .origin = {
+     2108:  566:                    .x = view->info_area.origin.x
+     2108:  567:                         + view->info_area.w * 0.1,
+     2108:  568:                    .y = view->info_area.origin.y
+     2108:  569:                         + view->info_area.h / 2 - square_size / 2
+        -:  570:            },
+        -:  571:            .h = square_size,
+        -:  572:            .w = square_size
+        -:  573:    };
+     2108:  574:    MLV_draw_filled_rectangle( relic.origin.x
+     2108:  574-block  0
+call    0 returned 2108
+     2108:  575:            , relic.origin.y
+call    0 returned 2108
+        -:  576:            , relic.w
+        -:  577:            , relic.h
+        -:  578:            , MLV_COLOR_GREEN3);
+     2108:  579:    MLV_Image *tmp = MLV_copy_image(view->images[IMAGE_RELIC]);
+call    0 returned 2108
+     2108:  580:    MLV_resize_image_with_proportions(tmp, relic.w, relic.h);
+call    0 returned 2108
+     2108:  581:    MLV_draw_image(tmp, relic.origin.x, relic.origin.y);
+call    0 returned 2108
+        -:  582:    /* Draw the number of stolen relics */
+     2108:  583:    sprintf(buffer, "x %d", n);
+     2108:  584:    MLV_draw_text_with_font(relic.origin.x + relic.w +  view->info_area.w * 0.01
+call    0 returned 2108
+     2108:  585:            , relic.origin.y + relic.h - relic.h * 0.8
+        -:  586:            , buffer
+     2108:  587:            , view->font_text
+call    0 returned 2108
+        -:  588:            ,MLV_COLOR_WHITE);
+     2108:  589:}
+        -:  590:
+function view_draw_mana_bar called 2108 returned 100% blocks executed 93%
+     2108:  591:static void view_draw_mana_bar(View *view, const GameData *data){
+        -:  592:    static char buffer[40] = {0};
+        -:  593:    /* * * * * * * * *
+        -:  594:     * Draw mana bar *
+        -:  595:     * * * * * * * * */
+     2108:  596:    int bar_w = view->info_area.w * 0.1;
+     2108:  597:    int bar_h = view->info_area.h * 0.3;
+     2108:  598:    Rectangle mana_bar = {
+        -:  599:            .origin = {
+     2108:  600:                    .x = view->info_area.w - bar_w - view->info_area.w * 0.02,
+     2108:  601:                    .y = view->info_area.h - bar_h - view->info_area.h * 0.1
+        -:  602:            },
+        -:  603:            .w = bar_w,
+        -:  604:            .h = bar_h
+        -:  605:    };
+        -:  606:    /* mana bar background */
+     2108:  607:    MLV_draw_filled_rectangle(mana_bar.origin.x
+     2108:  607-block  0
+call    0 returned 2108
+     2108:  608:            , mana_bar.origin.y
+call    0 returned 2108
+        -:  609:            , mana_bar.w
+        -:  610:            , mana_bar.h
+        -:  611:            , MLV_COLOR_BLACK);
+        -:  612:    /* mana bar quantity */
+        -:  613:    Rectangle mana_quantity;
+     2108:  614:    rectangle_with_padding(&mana_bar, 0.02, 0.05, &mana_quantity);
+call    0 returned 2108
+        -:  615:
+        -:  616:    /* update to proportional quantity */
+     2108:  617:    double max_mana =  (MANA_TILES_NUMBER / 4); /* for ux design purpose only */
+    2108*:  618:    double percentage = (MIN(data->player.mana, max_mana) * 100.0) / max_mana;
+branch  0 taken 2108 (fallthrough)
+branch  1 taken 0
+     2108:  618-block  0
+    %%%%%:  618-block  1
+     2108:  619:    MLV_draw_filled_rectangle(mana_quantity.origin.x
+     2108:  619-block  0
+call    0 returned 2108
+     2108:  620:            , mana_quantity.origin.y
+     2108:  621:            , (mana_quantity.w * percentage) / 100.0
+call    0 returned 2108
+        -:  622:            , mana_quantity.h
+        -:  623:            , MLV_COLOR_CYAN2);
+     2108:  624:    sprintf(buffer, "%d", data->player.mana);
+        -:  625:    /* draw number of mana */
+     2108:  626:    MLV_draw_text_with_font(mana_quantity.origin.x + view->info_area.h * 0.1
+call    0 returned 2108
+     2108:  627:            , mana_quantity.origin.y - mana_quantity.h * 0.1
+        -:  628:            , buffer
+     2108:  629:            , view->font_text
+call    0 returned 2108
+        -:  630:            ,MLV_COLOR_DARK_GREY);
+        -:  631:
+        -:  632:    /* draw "mana" label */
+        -:  633:    int text_w;
+     2108:  634:    MLV_get_size_of_text_with_font("Mana", &text_w, NULL, view->font_text);
+call    0 returned 2108
+     2108:  635:    MLV_draw_text_with_font(mana_quantity.origin.x - text_w - view->info_area.h * 0.1
+call    0 returned 2108
+     2108:  636:            , mana_quantity.origin.y
+        -:  637:            , "Mana"
+     2108:  638:            , view->font_text
+call    0 returned 2108
+        -:  639:            ,MLV_COLOR_WHITE);
+     2108:  640:}

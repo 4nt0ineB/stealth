@@ -4,8 +4,8 @@ void guard_init(Guard *guard, int x, int y) {
     position_init(&guard->position, x, y);
     guard->speed = float_rand(GUARD_MIN_SPEED, GUARD_MAX_SPEED);
     guard->direction = STILL;
-    guard->panic_mode = 0;
-    guard->panic_count = 0; /* To count the time he has been in panic mode*/
+    guard_unpanic(guard);
+    guard_reset_panic_count(guard);
 }
 
 void guard_update_speed(Guard *guard){

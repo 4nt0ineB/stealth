@@ -1,0 +1,424 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/model/Room.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Room.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Room.c.gcda
+        -:    0:Runs:1
+        -:    1:
+        -:    2:#include <assert.h>
+        -:    3:#include "model/Room.h"
+        -:    4:#include "core/Util.h"
+        -:    5:
+function generate_room called 34 returned 100% blocks executed 97%
+       34:    6:void generate_room(Room *room, int x_min, int y_min, int x_max, int y_max){
+        -:    7:    int i, j;
+       34:    8:    int x = x_max - x_min;
+       34:    9:    int y = y_max - y_min;
+       34:   10:    int compartiment_x = x / 2;
+       34:   11:    int compartiment_y = y / 2;
+       34:   12:    if (x > y){
+       34:   12-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 24
+        -:   13:        /* Compartiment from x distance */
+        -:   14:
+       10:   15:        if (x < 2 * MINSIDE + 1)
+       10:   15-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 6
+        4:   16:            return;
+        4:   16-block  0
+        6:   17:        else if (x < 4 * MINSIDE){
+        6:   17-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 2
+        4:   18:            if (rand() % 2)
+        4:   18-block  0
+call    0 returned 4
+branch  1 taken 0 (fallthrough)
+branch  2 taken 4
+    #####:   19:                return;
+    %%%%%:   19-block  0
+        -:   20:        }
+        -:   21:
+        6:   22:        if (rand() % 2){
+        6:   22-block  0
+call    0 returned 6
+branch  1 taken 2 (fallthrough)
+branch  2 taken 4
+        -:   23:            /* Extremity of y_min choosed*/
+        2:   24:            i = y_min + 3;
+        2:   25:            j = y_max;
+        2:   25-block  0
+        -:   26:        }
+        -:   27:        else {
+        -:   28:            /* Extremity of y_max choosed */
+        4:   29:            i = y_min;
+        4:   30:            j = y_max - 3;
+        4:   30-block  0
+        -:   31:        }
+        -:   32:        /* Creating the Wall that divide the 2 spaces at x/2 */
+      164:   33:        for (; i <= j; i++)
+        6:   33-block  0
+      164:   33-block  1
+branch  0 taken 158
+branch  1 taken 6 (fallthrough)
+      158:   34:            room->tiles[i][x_min + compartiment_x].type = WALL;
+      158:   34-block  0
+        6:   35:        generate_room(room, x_min, y_min, compartiment_x + x_min - 1, y_max);
+        6:   35-block  0
+call    0 returned 6
+        6:   36:        generate_room(room, compartiment_x + x_min + 1, y_min, x_max, y_max);
+call    0 returned 6
+        -:   37:    }
+        -:   38:    else {
+        -:   39:        /* Compartiment from y distance */
+       24:   40:        if (y < 2 * MINSIDE + 1)
+       24:   40-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 16
+        8:   41:            return;
+        8:   41-block  0
+       16:   42:        else if (y < 4 * MINSIDE){
+       16:   42-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 4
+       12:   43:            if (rand() % 2)
+       12:   43-block  0
+call    0 returned 12
+branch  1 taken 6 (fallthrough)
+branch  2 taken 6
+        6:   44:                return;
+        6:   44-block  0
+        -:   45:        }
+        -:   46:
+       10:   47:        if (rand() % 2){
+       10:   47-block  0
+call    0 returned 10
+branch  1 taken 4 (fallthrough)
+branch  2 taken 6
+        -:   48:            /* Extremity of y_min choosed*/
+        4:   49:            i = x_min + 3;
+        4:   50:            j = x_max;
+        4:   50-block  0
+        -:   51:        }
+        -:   52:        else {
+        -:   53:            /* Extremity of y_max choosed */
+        6:   54:            i = x_min;
+        6:   55:            j = x_max - 3;
+        6:   55-block  0
+        -:   56:        }
+        -:   57:        /* Creating the Wall that divide the 2 spaces at x/2 */
+      158:   58:        for (; i <= j; i++)
+       10:   58-block  0
+      158:   58-block  1
+branch  0 taken 148
+branch  1 taken 10 (fallthrough)
+      148:   59:            room->tiles[compartiment_y + y_min][i].type = WALL;
+      148:   59-block  0
+       10:   60:        generate_room(room, x_min, y_min, x_min, y_min + compartiment_y - 1);
+       10:   60-block  0
+call    0 returned 10
+       10:   61:        generate_room(room, x_min, y_min + compartiment_y + 1, x_max, y_max);
+call    0 returned 10
+        -:   62:    }
+        -:   63:}
+        -:   64:
+        -:   65:
+function room_get_tile_type called 5693020 returned 100% blocks executed 80%
+  5693020:   66:int room_get_tile_type(const Room *room, int i, int j){
+ 5693020*:   67:    assert(i < ROOM_HEIGHT && i >= 0);
+  5693020:   67-block  0
+branch  0 taken 5693020 (fallthrough)
+branch  1 taken 0
+  5693020:   67-block  1
+branch  2 taken 5693020 (fallthrough)
+branch  3 taken 0
+    %%%%%:   67-block  2
+call    4 never executed
+ 5693020*:   68:    assert(j < ROOM_WIDTH && j >= 0);
+  5693020:   68-block  0
+branch  0 taken 5693020 (fallthrough)
+branch  1 taken 0
+  5693020:   68-block  1
+branch  2 taken 5693020 (fallthrough)
+branch  3 taken 0
+    %%%%%:   68-block  2
+call    4 never executed
+  5693020:   69:    return tile_get_type(&room->tiles[i][j]);
+  5693020:   69-block  0
+call    0 returned 5693020
+        -:   70:}
+        -:   71:
+function room_random_position called 1123 returned 100% blocks executed 88%
+     1123:   72:int room_random_position(const Room *room, TileType tile_type, int *res_x, int *res_y){
+    1123*:   73:    assert(room);
+     1123:   73-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1123
+    %%%%%:   73-block  1
+call    2 never executed
+        -:   74:    do{
+     1409:   75:        *res_x = int_rand(1, ROOM_WIDTH - 1);
+     1409:   75-block  0
+call    0 returned 1409
+     1409:   76:        *res_y = int_rand(1, ROOM_HEIGHT - 1);
+call    0 returned 1409
+     1409:   77:    }while(room_get_tile_type(room, *res_y, *res_x) != tile_type);
+call    0 returned 1409
+branch  1 taken 286
+branch  2 taken 1123 (fallthrough)
+     1123:   78:    return 1;
+     1123:   78-block  0
+        -:   79:}
+        -:   80:
+function room_init called 2 returned 100% blocks executed 100%
+        2:   81:void room_init(Room *room){
+        -:   82:    int i, j;
+        -:   83:    /* Putting outview->side Walls all over the rectangle view->sides */
+       92:   84:    for (i = 0; i < ROOM_HEIGHT; i++){
+        2:   84-block  0
+       90:   84-block  1
+       92:   84-block  2
+branch  0 taken 90
+branch  1 taken 2 (fallthrough)
+     5490:   85:        for (j = 0; j < ROOM_WIDTH; j++){
+       90:   85-block  0
+     5400:   85-block  1
+     5490:   85-block  2
+branch  0 taken 5400
+branch  1 taken 90 (fallthrough)
+     5400:   86:            if (i == 0 || j == 0 || j == ROOM_WIDTH - 1 || i == ROOM_HEIGHT - 1)
+     5400:   86-block  0
+branch  0 taken 5280 (fallthrough)
+branch  1 taken 120
+     5280:   86-block  1
+branch  2 taken 5192 (fallthrough)
+branch  3 taken 88
+     5192:   86-block  2
+branch  4 taken 5104 (fallthrough)
+branch  5 taken 88
+     5104:   86-block  3
+branch  6 taken 116 (fallthrough)
+branch  7 taken 4988
+      412:   87:                tile_set_type(&room->tiles[i][j], WALL);
+      412:   87-block  0
+call    0 returned 412
+        -:   88:            else
+     4988:   89:                tile_set_type(&room->tiles[i][j], EMPTY);
+     4988:   89-block  0
+call    0 returned 4988
+        -:   90:        }
+        -:   91:    }
+        -:   92:    /* Generate inview->side walls*/
+        2:   93:    generate_room(room, 1, 1, ROOM_WIDTH - 1, ROOM_HEIGHT - 1);
+        2:   93-block  0
+call    0 returned 2
+        2:   94:}
+        -:   95:
+function room_resolve_collision called 12642 returned 100% blocks executed 97%
+    12642:   96:int room_resolve_collision(Room *room, Position *position){
+   12642*:   97:    assert(room && position);
+    12642:   97-block  0
+branch  0 taken 12642 (fallthrough)
+branch  1 taken 0
+    12642:   97-block  1
+branch  2 taken 12642 (fallthrough)
+branch  3 taken 0
+    %%%%%:   97-block  2
+call    4 never executed
+        -:   98:    /* top left tile */
+    12642:   99:    Position tl = {
+    12642:  100:            .x = MAX(0, (int) position->x - 1),
+    12642:  101:            .y = MAX(0, (int) position->y - 1)
+        -:  102:    };
+        -:  103:    /* bottom right tile */
+    12642:  104:    Position br = {
+    12642:  105:            .x = MIN(ROOM_WIDTH, (int) position->x + 1),
+    12642:  106:            .y = MIN(ROOM_HEIGHT, (int) position->y + 1)
+        -:  107:    };
+    12642:  108:    int collide = 0;
+        -:  109:    int y, x;
+    50568:  110:    for(y = (int) tl.y; y <= br.y; y++){
+    12642:  110-block  0
+    37926:  110-block  1
+    50568:  110-block  2
+branch  0 taken 37926
+branch  1 taken 12642 (fallthrough)
+   151704:  111:        for(x = (int) tl.x; x <= br.x; x++){
+    37926:  111-block  0
+   113778:  111-block  1
+   151704:  111-block  2
+branch  0 taken 113778
+branch  1 taken 37926 (fallthrough)
+   113778:  112:            if(room->tiles[y][x].type == WALL){
+   113778:  112-block  0
+branch  0 taken 12620 (fallthrough)
+branch  1 taken 101158
+        -:  113:                /* nearest point of the square */
+    25240:  114:                Position nearest = {
+    12620:  115:                        .x = CLAMP(x, position->x, x + 1),
+    12620:  115-block  0
+branch  0 taken 7097 (fallthrough)
+branch  1 taken 5523
+     7097:  115-block  1
+branch  2 taken 3067 (fallthrough)
+branch  3 taken 4030
+     8590:  115-block  2
+branch  4 taken 5523 (fallthrough)
+branch  5 taken 3067
+     5523:  115-block  3
+     3067:  115-block  4
+     8590:  115-block  5
+     4030:  115-block  6
+    12620:  116:                        .y = CLAMP(y, position->y, y + 1)
+    12620:  116-block  0
+branch  0 taken 7313 (fallthrough)
+branch  1 taken 5307
+     7313:  116-block  1
+branch  2 taken 1269 (fallthrough)
+branch  3 taken 6044
+     6576:  116-block  2
+branch  4 taken 5307 (fallthrough)
+branch  5 taken 1269
+     5307:  116-block  3
+     1269:  116-block  4
+     6576:  116-block  5
+     6044:  116-block  6
+        -:  117:                };
+        -:  118:                /* distance of this point to the center of the circle */
+        -:  119:                Position distance;
+    12620:  120:                position_sub(position, &nearest,  &distance);
+    12620:  120-block  0
+call    0 returned 12620
+        -:  121:                /* Distance to this point */
+    12620:  122:                double norm = vector_mag(&distance);
+call    0 returned 12620
+    12620:  123:                if(0.5 - norm > 0){
+branch  0 taken 2553 (fallthrough)
+branch  1 taken 10067
+     2553:  124:                    collide = 1;
+     2553:  125:                    if (norm == 0){
+     2553:  125-block  0
+branch  0 taken 25 (fallthrough)
+branch  1 taken 2528
+       25:  126:                        position->x = nearest.x + 0.5 * 0;
+       25:  127:                        position->y = nearest.y + 0.5 * 0;
+       25:  127-block  0
+        -:  128:                    }else {
+     2528:  129:                        position->x = nearest.x + 0.5 * (distance.x / norm);
+     2528:  130:                        position->y = nearest.y + 0.5 * (distance.y / norm);
+     2528:  130-block  0
+        -:  131:                    }
+        -:  132:                }
+        -:  133:            }
+        -:  134:        }
+        -:  135:    }
+    12642:  136:    return collide;
+    12642:  136-block  0
+        -:  137:}
+        -:  138:
+function room_tile_between called 1526 returned 100% blocks executed 100%
+     1526:  139:int room_tile_between(const Room *room, const Position *p1, const Position *p2, TileType tile_type){
+        -:  140:    int i;
+        -:  141:    double xa;
+        -:  142:    Position pos_a, tmp;
+    69392:  143:    for(i = 0; i < ROOM_HEIGHT; i++){
+     1526:  143-block  0
+    67866:  143-block  1
+    69392:  143-block  2
+branch  0 taken 67919
+branch  1 taken 1473 (fallthrough)
+        -:  144:        /* check if on segment */
+    67919:  145:        xa = (i - p1->y) / (p2->y - p1->y);
+    67919:  146:        if(xa >= 0 && xa <= 1){
+    67919:  146-block  0
+branch  0 taken 41270 (fallthrough)
+branch  1 taken 26649
+    41270:  146-block  1
+branch  2 taken 4896 (fallthrough)
+branch  3 taken 36374
+     4896:  147:            pos_a.y = i;
+     4896:  148:            position_interpolate_with_x(p1, p2, &pos_a);
+     4896:  148-block  0
+call    0 returned 4896
+     4896:  149:            tmp.x = (int) pos_a.x;
+     4896:  150:            tmp.y = (int) pos_a.y;
+     4896:  151:            if(room->tiles[(int) tmp.y][(int) tmp.x].type == tile_type)
+branch  0 taken 53 (fallthrough)
+branch  1 taken 4843
+       53:  152:                return 1;
+       53:  152-block  0
+        -:  153:        }
+        -:  154:    }
+        -:  155:
+    89613:  156:    for(i = 0; i < ROOM_WIDTH; i++){
+     1473:  156-block  0
+    88140:  156-block  1
+    89613:  156-block  2
+branch  0 taken 88155
+branch  1 taken 1458 (fallthrough)
+    88155:  157:        xa = (i - p1->x) / (p2->x - p1->x);
+        -:  158:        /* check if on segment */
+    88155:  159:        if(xa >= 0 && xa <= 1){
+    88155:  159-block  0
+branch  0 taken 38961 (fallthrough)
+branch  1 taken 49194
+    38961:  159-block  1
+branch  2 taken 4039 (fallthrough)
+branch  3 taken 34922
+     4039:  160:            pos_a.x = i;
+     4039:  161:            position_interpolate_with_y(p1, p2, &pos_a);
+     4039:  161-block  0
+call    0 returned 4039
+     4039:  162:            tmp.x = (int) pos_a.x;
+     4039:  163:            tmp.y = (int) pos_a.y;
+     4039:  164:            if(room->tiles[(int) tmp.y][(int) tmp.x].type == tile_type)
+branch  0 taken 15 (fallthrough)
+branch  1 taken 4024
+       15:  165:                return 1;
+       15:  165-block  0
+        -:  166:        }
+        -:  167:    }
+        -:  168:
+     1458:  169:    return 0;
+     1458:  169-block  0
+        -:  170:}
+        -:  171:
+function room_get_tile called 2114 returned 100% blocks executed 80%
+     2114:  172:Tile * room_get_tile(Room *room, int i, int j){
+    2114*:  173:    assert(i < ROOM_HEIGHT && i >= 0);
+     2114:  173-block  0
+branch  0 taken 2114 (fallthrough)
+branch  1 taken 0
+     2114:  173-block  1
+branch  2 taken 2114 (fallthrough)
+branch  3 taken 0
+    %%%%%:  173-block  2
+call    4 never executed
+    2114*:  174:    assert(j < ROOM_WIDTH && j >= 0);
+     2114:  174-block  0
+branch  0 taken 2114 (fallthrough)
+branch  1 taken 0
+     2114:  174-block  1
+branch  2 taken 2114 (fallthrough)
+branch  3 taken 0
+    %%%%%:  174-block  2
+call    4 never executed
+     2114:  175:    return &room->tiles[i][j];
+     2114:  175-block  0
+        -:  176:}
+        -:  177:
+function room_add_mana called 2109 returned 100% blocks executed 100%
+     2109:  178:void room_add_mana(Room *room, int amount){
+        -:  179:    int y, x;
+        -:  180:    int i;
+     3219:  181:    for(i = 0; i < amount; i++){
+     2109:  181-block  0
+     3219:  181-block  1
+branch  0 taken 1110
+branch  1 taken 2109 (fallthrough)
+     1110:  182:        room_random_position(room, EMPTY, &x, &y);
+     1110:  182-block  0
+call    0 returned 1110
+     1110:  183:        room->tiles[y][x].type = MANA;
+        -:  184:    }
+     2109:  185:}

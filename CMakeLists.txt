@@ -8,36 +8,24 @@ include_directories(include/controller)
 include_directories(include/graphics)
 
 add_executable(stealth
-        include/controller/Controller.h
-        include/model/Player.h
-        include/model/Guard.h
-        include/view/Menu.h
-        include/model/Relic.h
-        include/model/Room.h
-        include/Test.h
-        src/controller/Controller.c
-        src/model/Player.c
-        src/model/Guard.c
         src/Main.c
-        src/view/Menu.c
-        src/model/Relic.c
-        src/model/Room.c
-        src/Test.c
-        src/model/Tile.c
-        src/model/Direction.c
-        include/core/Settings.h
-        src/view/View.c
-        include/view/View.h
-        src/core/geometry/Rectangle.c
-        include/core/geometry/Rectangle.h
-        src/core/geometry/Position.c
-        include/core/geometry/Position.h
-        src/core/geometry/Circle.c
-        include/core/geometry/Circle.h
-        src/core/Util.c
-        include/core/Util.h src/core/Settings.c
-        src/core/Timer.c
-        include/core/Timer.h src/model/Skill.c include/model/Skill.h src/model/Score.c include/model/Score.h src/controller/GameData.c include/controller/GameData.h src/controller/Button.c include/controller/Button.h)
+        src/controller/Controller.c include/controller/Controller.h
+        src/model/Player.c include/model/Player.h
+        src/model/Guard.c include/model/Guard.h
+        src/model/Relic.c include/model/Relic.h
+        src/model/Room.c include/model/Room.h
+        src/model/Tile.c include/model/Tile.h
+        src/model/Direction.c include/model/Direction.h
+        src/core/Settings.c include/core/Settings.h
+        src/view/View.c include/view/View.h
+        src/core/geometry/Rectangle.c include/core/geometry/Rectangle.h
+        src/core/geometry/Position.c include/core/geometry/Position.h
+        src/core/Util.c include/core/Util.h
+        src/core/Timer.c include/core/Timer.h
+        src/model/Skill.c include/model/Skill.h
+        src/model/Score.c include/model/Score.h
+        src/controller/GameData.c include/controller/GameData.h
+        src/controller/Button.c include/controller/Button.h)
 
 target_link_libraries(${PROJECT_NAME} MLV m)
 # Macros

@@ -1,0 +1,92 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/model/Skill.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Skill.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/model/Skill.c.gcda
+        -:    0:Runs:1
+        -:    1:/*
+        -:    2: *   This file is part of Stealth game
+        -:    3: *    Yann ROUX--DAUGROIS
+        -:    4: *   and Antoine Bastos
+        -:    5: *   SPDX-License-Identifier: Apache-2.0
+        -:    6: */
+        -:    7:
+        -:    8:#include <assert.h>
+        -:    9:#include "model/Skill.h"
+        -:   10:#include "core/Settings.h"
+        -:   11:
+function skill_check_type called 13089 returned 100% blocks executed 67%
+    13089:   12:void skill_check_type(SkillType type){
+   13089*:   13:    assert(type >= 0 && type < SKILL_NUMBER);
+    13089:   13-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 13089
+    %%%%%:   13-block  1
+call    2 never executed
+    13089:   14:}
+        -:   15:
+function skill_init called 4 returned 100% blocks executed 100%
+        4:   16:void skill_init(Skill *skill, SkillType type){
+        4:   17:    skill_check_type(type);
+        4:   17-block  0
+call    0 returned 4
+        4:   18:    skill->type = type;
+        4:   19:    switch (type) {
+branch  0 taken 2
+branch  1 taken 2
+branch  2 taken 0
+        2:   20:        case INVISIBILITY:
+        2:   21:            skill->mana_consumption = 1;
+        2:   22:            break;
+        2:   22-block  0
+        2:   23:        case SPEED:
+        2:   24:            skill->mana_consumption = 2;
+        2:   24-block  0
+        2:   25:        default:
+        2:   26:            break;
+        2:   26-block  0
+        -:   27:    }
+        4:   28:}
+        -:   29:
+function skill_mana_consumption called 4286 returned 100% blocks executed 75%
+     4286:   30:int skill_mana_consumption(const Skill *skill){
+    4286*:   31:    assert(skill);
+     4286:   31-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4286
+    %%%%%:   31-block  1
+call    2 never executed
+     4286:   32:    return skill->mana_consumption;
+     4286:   32-block  0
+        -:   33:}
+        -:   34:
+function skill_is_activated called 15194 returned 100% blocks executed 75%
+    15194:   35:int skill_is_activated(const Skill *skill){
+   15194*:   36:    assert(skill);
+    15194:   36-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15194
+    %%%%%:   36-block  1
+call    2 never executed
+    15194:   37:    return skill->activated;
+    15194:   37-block  0
+        -:   38:}
+        -:   39:
+function skill_activate called 72 returned 100% blocks executed 67%
+       72:   40:void skill_activate(Skill *skill){
+      72*:   41:    assert(skill);
+       72:   41-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 72
+    %%%%%:   41-block  1
+call    2 never executed
+       72:   42:    skill->activated = 1;
+       72:   43:}
+function skill_deactivate called 4233 returned 100% blocks executed 67%
+     4233:   44:void skill_deactivate(Skill *skill){
+    4233*:   45:    assert(skill);
+     4233:   45-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4233
+    %%%%%:   45-block  1
+call    2 never executed
+     4233:   46:    skill->activated = 0;
+     4233:   47:}

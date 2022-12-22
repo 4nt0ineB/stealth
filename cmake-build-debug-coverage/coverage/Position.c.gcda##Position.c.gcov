@@ -1,0 +1,96 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/core/geometry/Position.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/core/geometry/Position.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/core/geometry/Position.c.gcda
+        -:    0:Runs:1
+        -:    1:/*
+        -:    2: *   This file is part of Stealth game
+        -:    3: *    Yann ROUX--DAUGROIS
+        -:    4: *   and Antoine Bastos
+        -:    5: *   SPDX-License-Identifier: Apache-2.0
+        -:    6: */
+        -:    7:
+        -:    8:#include <stdio.h>
+        -:    9:#include "core/geometry/Position.h"
+        -:   10:
+        -:   11:#include <assert.h>
+        -:   12:#include <math.h>
+        -:   13:
+function position_print called 0 returned 0% blocks executed 0%
+    #####:   14:void position_print(Position *position){
+    #####:   15:    printf("(%f, %f)", position->x, position->y);
+    %%%%%:   15-block  0
+call    0 never executed
+    #####:   16:}
+        -:   17:
+function position_init called 19 returned 100% blocks executed 67%
+       19:   18:void position_init(Position *position, int x, int y){
+      19*:   19:    assert(position);
+       19:   19-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 19
+    %%%%%:   19-block  1
+call    2 never executed
+       19:   20:    position->x = x;
+       19:   21:    position->y = y;
+       19:   22:}
+        -:   23:
+function position_dist called 30620 returned 100% blocks executed 100%
+    30620:   24:double position_dist(const Position *a, const Position *b){
+    61240:   25:    return sqrt((b->x - a->x) * (b->x - a->x)
+    30620:   26:    + (b->y - a->y) * (b->y - a->y));
+    30620:   26-block  0
+        -:   27:}
+        -:   28:
+function position_sub called 12620 returned 100% blocks executed 83%
+    12620:   29:void position_sub(const Position *a, const Position *b, Position *result){
+   12620*:   30:    assert(a && b && result);
+    12620:   30-block  0
+branch  0 taken 12620 (fallthrough)
+branch  1 taken 0
+    12620:   30-block  1
+branch  2 taken 12620 (fallthrough)
+branch  3 taken 0
+    12620:   30-block  2
+branch  4 taken 12620 (fallthrough)
+branch  5 taken 0
+    %%%%%:   30-block  3
+call    6 never executed
+    12620:   31:    result->x = a->x - b->x;
+    12620:   32:    result->y = a->y - b->y;
+    12620:   33:}
+        -:   34:
+function vector_mag called 12620 returned 100% blocks executed 75%
+    12620:   35:double vector_mag(const Vector *v){
+   12620*:   36:    assert(v);
+    12620:   36-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12620
+    %%%%%:   36-block  1
+call    2 never executed
+    12620:   37:    return sqrt(v->x * v->x + v->y * v->y);
+    12620:   37-block  0
+        -:   38:}
+        -:   39:
+function position_interpolate_with_x called 4896 returned 100% blocks executed 100%
+     4896:   40:void position_interpolate_with_x(const Position *a, const Position *b, Position *to_find){
+     4896:   41:    to_find->x = a->x + ((b->x - a->x) / (b->y - a->y)) * (to_find->y - a->y);
+     4896:   42:}
+        -:   43:
+function position_interpolate_with_y called 4039 returned 100% blocks executed 100%
+     4039:   44:void position_interpolate_with_y(const Position *a, const Position *b, Position *to_find){
+     4039:   45:    to_find->y = a->y + ((b->y - a->y) / (b->x - a->x)) * (to_find->x - a->x);
+     4039:   46:}
+        -:   47:
+function position_eq called 23 returned 100% blocks executed 100%
+       23:   48:int position_eq(const Position *a, const Position *b){
+       23:   49:    return (a->x == b->x && a->y == b->y);
+       23:   49-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 20
+        3:   49-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        3:   49-block  2
+       20:   49-block  3
+       23:   49-block  4
+        -:   50:}

@@ -1,0 +1,87 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/core/Util.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/core/Util.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/core/Util.c.gcda
+        -:    0:Runs:1
+        -:    1:/*
+        -:    2: *   This file is part of Stealth game
+        -:    3: *    Yann ROUX--DAUGROIS
+        -:    4: *   and Antoine Bastos
+        -:    5: *   SPDX-License-Identifier: Apache-2.0
+        -:    6: */
+        -:    7:
+        -:    8:#include "core/Util.h"
+        -:    9:
+        -:   10:#include <stdio.h>
+        -:   11:#include <stdlib.h>
+        -:   12:#include <assert.h>
+        -:   13:
+function int_rand called 28035 returned 100% blocks executed 100%
+    28035:   14:int int_rand(int a, int b){
+    28035:   15:    return (rand() % (b + 1 - a)) + a;
+    28035:   15-block  0
+call    0 returned 28035
+        -:   16:}
+        -:   17:
+function float_rand called 383 returned 100% blocks executed 100%
+      383:   18:float float_rand(float min, float max){
+      383:   19:    return min + (rand() / (float) RAND_MAX) * (max - min);
+      383:   19-block  0
+call    0 returned 383
+        -:   20:}
+        -:   21:
+function modulo called 33343 returned 100% blocks executed 86%
+    33343:   22:int modulo(int a, int b) {
+        -:   23:    int mod;
+   33343*:   24:    assert(b != 0);
+    33343:   24-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 33343
+    %%%%%:   24-block  1
+call    2 never executed
+    33343:   25:    mod = a % b;
+    33343:   26:    return mod >= 0 ? mod : mod + b;
+    33343:   26-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 33339
+        4:   26-block  1
+    33339:   26-block  2
+    33343:   26-block  3
+        -:   27:}
+        -:   28:
+function greatest_common_multiplier_less_than called 2 returned 100% blocks executed 100%
+        2:   29:int greatest_common_multiplier_less_than(int a, int b, int max){
+        -:   30:    int lcm, found, lastvalid;
+        2:   31:    lcm = lastvalid = MIN(a, b);
+        2:   32:    found = 0;
+     1567:   33:    while(!found && lcm <= max){
+        2:   33-block  0
+     1567:   33-block  1
+branch  0 taken 1567 (fallthrough)
+branch  1 taken 0
+     1567:   33-block  2
+branch  2 taken 1565
+branch  3 taken 2 (fallthrough)
+     1565:   34:        found = 1;
+     1565:   35:        if(lcm % a != 0 || lcm % b != 0)
+     1565:   35-block  0
+branch  0 taken 27 (fallthrough)
+branch  1 taken 1538
+       27:   35-block  1
+branch  2 taken 19 (fallthrough)
+branch  3 taken 8
+     1557:   36:            found = 0;
+     1557:   36-block  0
+     1565:   37:        if(found) {
+     1565:   37-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 1557
+        8:   38:            lastvalid = lcm;
+        8:   39:            found = 0;
+        8:   39-block  0
+        -:   40:        }
+     1565:   41:        lcm++;
+     1565:   41-block  0
+        -:   42:    }
+        2:   43:    return lastvalid;
+        2:   43-block  0
+        -:   44:}

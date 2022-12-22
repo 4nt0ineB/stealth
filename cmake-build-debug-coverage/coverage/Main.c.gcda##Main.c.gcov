@@ -1,0 +1,22 @@
+        -:    0:Source:/home/antoine/Documents/Developpement/c/stealth/src/Main.c
+        -:    0:Graph:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/Main.c.gcno
+        -:    0:Data:/home/antoine/Documents/Developpement/c/stealth/cmake-build-debug-coverage/CMakeFiles/stealth.dir/src/Main.c.gcda
+        -:    0:Runs:1
+        -:    1:
+        -:    2:#include "model/Room.h"
+        -:    3:#include "controller/Controller.h"
+        -:    4:
+        -:    5:#include <stdio.h>
+        -:    6:#include <stdlib.h>
+        -:    7:#include <time.h>
+        -:    8:#include <unistd.h>
+        -:    9:
+function main called 1 returned 100% blocks executed 100%
+        1:   10:int main(int args, char *argv[]){
+        1:   11:    srand(time(NULL));
+        1:   11-block  0
+call    0 returned 1
+call    1 returned 1
+        1:   12:    return controller_run();
+call    0 returned 1
+        -:   13:}
