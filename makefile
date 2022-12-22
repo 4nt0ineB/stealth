@@ -8,7 +8,6 @@ OBJDIR = $(BINDIR)obj/
 
 EXEC = $(BINDIR)prog
 
-
 #### Modules path ####
 # find all modules (.c)
 SRC = $(shell find $(SRCDIR) -name \*.c)
@@ -66,11 +65,11 @@ doc:
 ###### Cleaning ######
 clean:
 	@rm -rf $(OBJDIR)
-	@rm -rf html
+	@rm -rf doc/html
 
 uninstall: clean
 	@rm -rf $(BINDIR)
 
 
-# Donc on evite decrire les depandances a la main.
+# Donc on evite decrire les dependances a la main.
 -include $(DEP)
