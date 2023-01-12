@@ -6,7 +6,7 @@ HEADDIR = include/
 BINDIR = bin/
 OBJDIR = $(BINDIR)obj/
 
-EXEC = $(BINDIR)prog
+EXEC = $(BINDIR)stealth
 
 #### Modules path ####
 # find all modules (.c)
