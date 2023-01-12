@@ -54,10 +54,24 @@ int room_tile_between(const Room *room, const Position *p1, const Position *p2, 
  */
 void room_add_mana(Room *room, int amount);
 
-
-
+/**
+ * @brief Get the type of tile in the room
+ * 
+ * @param room the room
+ * @param i y axis
+ * @param j x axis
+ * @return int 
+ */
 int room_get_tile_type(const Room *room, int i, int j);
 
+/**
+ * @brief Return the pointer of the tile at a given index
+ * 
+ * @param room a room 
+ * @param i y axis
+ * @param j x axis
+ * @return Tile* 
+ */
 Tile * room_get_tile(Room *room, int i, int j);
 
 /**

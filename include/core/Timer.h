@@ -49,6 +49,12 @@ int timer_ms_to_h(int ms);
 Timer * new_timer();
 void timer_start(Timer *t);
 void timer_update(Timer *t);
+/**
+ * @brief Sprint the elapsed time as m:s:ss
+ * 
+ * @param t 
+ * @param buffer 
+ */
 void timer_sprintf(const Timer *t, char *buffer);
 void timer_fprint(const Timer *t, FILE *stream);
 void timer_print(const Timer *t);

@@ -48,16 +48,49 @@ void guard_panic(Guard *guard);
  */
 void guard_unpanic(Guard *guard);
 
+/**
+ * @brief update the direction of a guard
+ * 
+ * @param guard 
+ * @return Direction 
+ */
 Direction guard_update_direction(Guard *guard);
 
+/**
+ * @brief Update the speed of a guard
+ * 
+ * @param guard 
+ */
 void guard_update_speed(Guard *guard);
 
+/**
+ * @brief Get the view range of a guard
+ * 
+ * @param guard 
+ * @return double 
+ */
 double guard_view_range(const Guard *guard);
 
+/**
+ * @brief Reset the panic count down of a guard
+ * 
+ * @param guard 
+ */
 void guard_reset_panic_count(Guard *guard);
 
+/**
+ * @brief Update the panic count down of a guard
+ * 
+ * @param guard 
+ */
 void guard_update_panic_count(Guard *guard);
 
+/**
+ * @brief Test if a guard is panicking
+ * 
+ * @param guard 
+ * @return int 
+ */
 int guard_is_panicking(const Guard *guard);
 
 #endif /* STEALTH_GUARD_H */

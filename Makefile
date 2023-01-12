@@ -1,4 +1,4 @@
-.PHONY: clean uninstall --make-bin-dir
+.PHONY: clean uninstall --make-bin-dir doc
 
 ###### PATHS ######
 SRCDIR = src/
@@ -20,7 +20,7 @@ SUBMODULES = $(shell dirname $(OBJ))
 ARGS =
 CC = gcc
 LDFLAGS = -lMLV -lm
-CFLAGS = -ansi -O2 -g -Wall  \
+CFLAGS = -ansi -O2 -Wall  \
 			-I$(HEADDIR) -I$(HEADDIR)controller/ -I$(HEADDIR)graphics/  -I$(HEADDIR)core/ -I$(HEADDIR)/ \
 			-DRESOURCES_DIR='"resources/"' \
 			-DDEFAULT_WIN_H_PERCENT=70 \
@@ -60,7 +60,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 	@mkdir -p $(shell dirname $(OBJ))
 
 doc:
-	doxygen doxygen
+	doxygen ./doc/Doxyfile
 
 ###### Cleaning ######
 clean:

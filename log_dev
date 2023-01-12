@@ -1,0 +1,56 @@
+b861c90	Antoine B	Thu Jan 12 16:54:40 2023 +0100	++
+3e00e5a	Antoine B	Thu Dec 22 15:28:53 2022 +0100	rapport
+87660b5	Antoine B	Thu Dec 22 11:46:57 2022 +0100	doxyile
+a25d779	Antoine B	Thu Dec 22 11:10:49 2022 +0100	WIP on dev: 57f6806 unused files
+48a292e	Antoine B	Thu Dec 22 11:10:49 2022 +0100	index on dev: 57f6806 unused files
+57f6806	Antoine B	Thu Dec 22 11:08:31 2022 +0100	unused files
+5283364	Antoine B	Thu Dec 22 10:15:56 2022 +0100	quit with escape (because if in fullscreen well.. you can't quit without play) and pause with 'p'
+f43f586	RnK-web	Wed Dec 21 21:14:33 2022 +0100	guard outside game area bug fixed
+d8e7a1b	RnK-web	Wed Dec 21 21:10:11 2022 +0100	Guard outside game area bug fixed
+125238f	Yann Rdgs	Wed Dec 21 18:01:46 2022 +0100	Update README.md
+5beb349	Yann Rdgs	Wed Dec 21 18:01:23 2022 +0100	Update README.md
+d6ac021	RnK-web	Wed Dec 21 17:16:56 2022 +0100	Quick spawn detection fix
+53294ed	RnK-web	Wed Dec 21 17:03:57 2022 +0100	Fixed guard could spawn too close to player and escape key during game make the game pause or unpause
+617b508	Antoine B	Wed Dec 21 13:12:18 2022 +0100	best time right ordering
+c3df31e	Antoine B	Tue Dec 20 17:01:34 2022 +0100	bg image and menu with fullscreen option
+0a174c9	RnK-web	Mon Dec 19 18:14:02 2022 +0100	Guard vision range drawing
+9563611	RnK-web	Mon Dec 19 18:06:09 2022 +0100	retry functionnability available
+2efc651	RnK-web	Mon Dec 19 17:24:31 2022 +0100	some compilation warnings resolved
+51d26a5	RnK-web	Mon Dec 19 17:20:33 2022 +0100	Mana gotten from tiles augmented making game more playable
+46e6b3e	Antoine B	Sun Dec 18 23:36:58 2022 +0100	player cant be caught if invisible
+08bd922	Antoine B	Sun Dec 18 19:56:13 2022 +0100	+ player skill activation color effect + score board display at end game screen + top score files i/o
+c478613	RnK-web	Fri Dec 16 19:22:31 2022 +0100	Kinda fixed room generation still some openings of 2 tiles but seems okay
+899ab01	RnK-web	Fri Dec 16 19:11:43 2022 +0100	quick controller win condition
+394a500	Antoine B	Thu Dec 15 23:57:41 2022 +0100	tile type assertion fix
+e2c1dc1	Antoine B	Thu Dec 15 23:51:42 2022 +0100	relic sprite in info bar
+2b1fd8e	Antoine B	Thu Dec 15 23:43:00 2022 +0100	put some sprites
+a7ca664	Antoine B	Thu Dec 15 19:39:11 2022 +0100	some sound effect added small music theme by me :p
+8d35fa0	Antoine B	Thu Dec 15 12:52:18 2022 +0100	audio init
+07fd520	Antoine B	Thu Dec 15 12:11:59 2022 +0100	controller delegation
+bfcfbe0	Antoine B	Mon Nov 28 21:50:27 2022 +0100	+ visual indicator of panic mode + number of stolen relics in info bar + speed skill
+353c050	Antoine B	Mon Nov 28 17:02:16 2022 +0100	draw relics on view + guards can't panic twice for the same missing relic
+1b85fa3	RnK-web	Sun Nov 27 00:36:06 2022 +0100	Made If player on a relic tile that is not taken then take it
+cf61ed1	RnK-web	Sun Nov 27 00:22:23 2022 +0100	made the room init relics function and the guard sees relic function aswell and the fact that all guards go panic if one of them sees a missing relic
+239668e	RnK-web	Sat Nov 26 23:41:25 2022 +0100	Made counter for the guard panic mode duration now guards panick for 30 seconds
+fdb01a0	Antoine B	Sat Nov 26 16:41:28 2022 +0100	clean
+2fdc0f3	Antoine B	Sat Nov 26 16:33:55 2022 +0100	player get mana + mana bar display
+34293b0	Antoine B	Sat Nov 26 00:26:47 2022 +0100	Merge branch 'guard-detection' into dev Guard player detection mechanism. The panic mode is used as a way of checking if its working or not. But when the player is in the detection range of a guard the game must end actually.
+0bd59cd	Antoine B	Sat Nov 26 00:21:41 2022 +0100	player detection by guard (use panic mode to test if works normally the game just end)
+382bcba	Antoine B	Wed Nov 23 23:01:31 2022 +0100	Merge pull request #3 from cydaw6/collision
+96c8cb3	Antoine B	Wed Nov 23 22:47:02 2022 +0100	guard basic moves ok
+980a8ce	Antoine B	Wed Nov 23 19:24:57 2022 +0100	collision and collision response ok
+a6c411b	cydaw	Wed Nov 23 16:39:43 2022 +0100	try collision on corners
+992f247	Antoine B	Wed Nov 23 00:45:45 2022 +0100	move player ok, working on collision
+1f69889	y_rdgs	Tue Nov 8 12:00:20 2022 +0100	Merge pull request #2 from cydaw6/mlv-setup
+038bd6c	Antoine B	Tue Nov 8 01:02:01 2022 +0100	Setup MLV lib linking in Makefile and CMakeLists.txt. Setup of the View and some basic printing functions of the window elements. Little controller added with a small game loop for testing the view with refresh rate and timer of elapsed time (with a new module "Timer"). + tidying up the working directory + Settings module with all shared constant and macros + Util for useful function used across the project
+de0b43c	Antoine B	Tue Nov 8 01:01:32 2022 +0100	Setup MLV lib linking in Makefile and CMakeLists.txt. Setup of the View and some basic printing functions of the window elements. Little controller added with a small game loop for testing the view with refresh rate and timer of elapsed time (with a new module "Timer"). + tidying up the working directory + Settings module with all shared constant and macros + Util for useful function used across the project
+8859b62	RnK-web	Sat Nov 5 17:19:27 2022 +0100	Bug fixed of room generation function tested with valgrind should be good now
+119abfc	RnK-web	Sat Nov 5 16:37:58 2022 +0100	Put -O2 back in makefile since was not the problem
+b41d839	RnK-web	Sat Nov 5 16:34:29 2022 +0100	Made Room generation function and changed some init function instead of going to return the struct we go by adress
+f08c5c7	RnK-web	Fri Nov 4 19:13:31 2022 +0100	Made some init function and basic structures needed for the game might change attributes or even structure later on Done some of functions for guard
+810c454	Antoine B	Fri Nov 4 15:56:07 2022 +0100	Merge pull request #1 from cydaw6/init
+45fbb98	Antoine B	Fri Nov 4 12:12:10 2022 +0100	CMakeLists.txt
+4dfe6b1	Antoine B	Fri Nov 4 11:44:25 2022 +0100	project env improvement
+bdea05d	RnK-web	Thu Nov 3 16:57:20 2022 +0100	Ajouts des en-tetes oubliés dans le main et enleve d'un module non conservé dans le makefile
+45be2ef	RnK-web	Thu Nov 3 16:46:06 2022 +0100	Modularisation du projet et MakeFile ainsi que separation des fichiers dans leurs dossiers src include et bin
+50bd0de	Antoine B	Thu Nov 3 13:50:50 2022 +0100	Initial commit
