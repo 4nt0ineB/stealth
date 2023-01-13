@@ -40,7 +40,7 @@ escape to exit a menu or end a game
 wqsd for moving in the room
 
 ### Abilities
-speed : left or right shift 
+speed : left or right shift <br>
 invisibility : space
 
 ### Credits
